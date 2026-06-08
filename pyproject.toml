@@ -1,0 +1,8 @@
+[tool.ruff]
+
+select = ["E", "F", "I", "N", "UP", "B", "A"]
+
+ignore = []
+
+target-version = "py312"
+fixable = ["ALL"]
