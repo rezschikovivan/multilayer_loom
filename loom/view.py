@@ -46,7 +46,7 @@ class Window(Singleton):
         name_entry.grid(row=1, column=0)
 
     @property
-    def left_panel(self)->SettingsPanel:
+    def left_panel(self)->"SettingsPanel":
         if self.__left_panel is None:
             self.__left_panel = SettingsPanel(self.__root, foo)
         return self.__left_panel
