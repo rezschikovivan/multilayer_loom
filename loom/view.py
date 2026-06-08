@@ -1,5 +1,5 @@
-from tkinter import Tk, SOLID, W, BOTH, LEFT, RIGHT, Misc
-from tkinter.ttk import Frame, Label, Entry, Button
+from tkinter import BOTH, LEFT, RIGHT, SOLID, Misc, Tk, W
+from tkinter.ttk import Button, Entry, Frame, Label
 
 
 class Singleton:

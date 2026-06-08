@@ -1,6 +1,6 @@
-from loom.view import Window
-
 from tkinter import Tk
+
+from loom.view import Window
 
 root = Tk()
 win = Window.get_instance(root)
