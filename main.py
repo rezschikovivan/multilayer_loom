@@ -1,8 +1,4 @@
-from tkinter import Tk
+from loom.view.window import Window
 
-from loom.view import Window
-
-root = Tk()
-win = Window.get_instance(root)
-w = Window.get_instance(root)
+win = Window.get_instance()
 win.run()
