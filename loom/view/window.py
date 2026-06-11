@@ -1,16 +1,11 @@
 from tkinter import BOTH, RIGHT, SOLID, Tk
 from tkinter.ttk import Frame
+from abc import ABC, abstractmethod
 
 from loom.view.tab_menu import TopMenu
 from loom.view.input_panel import SettingsPanel
-from loom.controller.input_feilds import InputFeild
+from loom.controller.input_feilds import InputWiget
 from loom.controller.command import Command
-
-def foo(*args):
-    print("Foo Foo")
-
-def bar(*args):
-    print("Bar Bar")
 
 class Window():
 
@@ -22,7 +17,7 @@ class Window():
         self.panel = SettingsPanel(self.root)
         self.menu = TopMenu(self.root)
 
-        self.main_frame = Frame(borderwidth=5, relief=SOLID, padding=[8, 10])
+        self.main_frame = Frame(borderwidth=1, relief=SOLID, padding=[8, 10])
         self.main_frame.pack(side=RIGHT, fill=BOTH, expand=True)
 
         self.bind_Z_btn()
@@ -31,11 +26,12 @@ class Window():
     def config_window(self):
         """Adjusts the window size, title, and icon"""
         self.root.title("Многослойный ткацкий станок КГУ")
-        self.root.geometry("600x400")
-        self.root.iconbitmap(default="icon.ico")
-        self.root.state('zoomed')# expand on all screen
+        #self.root.iconbitmap(default="icon.ico", bitmap="icon.ico")
+        w = self.root.winfo_screenwidth()
+        h = self.root.winfo_screenheight()
+        self.root.geometry(f"{w}x{h}")# set fullscreen
 
-    def add_feild_to_panel(self, input_feild_class:InputFeild, name:str, receiver):
+    def add_feild_to_panel(self, input_feild_class:InputWiget, name:str, receiver):
         self.panel.add_input_feild(input_feild_class, name, receiver)
 
     def bind_Z_btn(self):

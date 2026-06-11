@@ -1,9 +1,9 @@
 from loom.view.window import Window
-from loom.model.config_params import Configuration
+from loom.model.profile_data import Profile
 from loom.controller.input_feilds import IntFeild
 
 win = Window()
-params = Configuration()
+params = Profile()
 
 
 from tkinter.ttk import Label

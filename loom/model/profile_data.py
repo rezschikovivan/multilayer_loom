@@ -1,8 +1,9 @@
 from tkinter import IntVar
 
-class Configuration:
+class Profile:
     def __init__(self):
         self.height = IntVar()
         self.width  = IntVar()
+    
     
     
