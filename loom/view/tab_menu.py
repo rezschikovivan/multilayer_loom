@@ -1,6 +1,7 @@
 from tkinter import Tk, Menu
 
-class TopMenu:
+class TabMenu:
+    """Top menu battons object"""
     def __init__(self, root:Tk):
         self.__root = root
         self.__root.option_add("*tearOff", False)
