@@ -34,7 +34,7 @@ class Window():
         self.parametrs_panel.add_input_feild(input_feild_class, name, receiver)
 
     def bind_Z_Y_btns(self):
-        """Bind undo and reverse undo"""
+        """Bind undo and reverse undo buttons"""
         self.root.bind_all("<Control-z>", Command.manager.unexecute)
         self.root.bind_all("<Control-y>", Command.manager.reverse_unexecute)
     

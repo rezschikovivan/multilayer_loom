@@ -16,6 +16,7 @@ class Singleton:
         return cls._instance
     
 class BottomlessStack:
+    """Stack with auto clearing. If len arcoss the max_len, first item is deleting."""
     def __init__(self, max_len=10):
         self.enum = []
         self.max_len = max_len

@@ -4,7 +4,7 @@ from loom.controller.command import Command
 from abc import ABC, abstractmethod
 
 class GetInputCommand(Command):
-    """Command for listening user input in feilds. Can reverse changes and reverses. Managing by command/CommandManager"""
+    """Command to get user input in feilds. Can reverse changes and reverses. Managed by CommandManager"""
     def __init__(self, feild:"InputWiget", receiver:Variable):
         self.feild = feild
         self.receiver = receiver
@@ -33,12 +33,11 @@ class GetInputCommand(Command):
         return cpy
 
 class InputWiget(ABC):
-    """Wiget each can take user input. Intaracting withs model/ through command subclass"""
+    """Wiget each can take user input. Intaracting withs model variables through Command subclass"""
     def __init__(self, root:Misc, name:str, receiver:Variable):
         self._root = root
         self._name = name
-        self._receiver = receiver
-        self._command = GetInputCommand(self, self._receiver)
+        self._command = GetInputCommand(self, receiver)
         self.create_title()
         self.get_validatcommand()
         self._input_widget = self.create_widget()

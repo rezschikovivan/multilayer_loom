@@ -3,7 +3,7 @@ from loom.utils import BottomlessStack
 from tkinter import END, Event
 
 class CommandManager():
-    """Manager each allows to manage the commands"""
+    """Manager each allows methods to manage the commands"""
     def __init__(self):
         self.past_commands = BottomlessStack()
         self.future_commands = BottomlessStack()
@@ -19,6 +19,7 @@ class CommandManager():
             cmnd: "Command" = self.future_commands.pop()
             cmnd.reverse_undo()
             self.past_commands.append(cmnd)
+
 class Command(ABC):
     """Abstract interface of "command" pattern """
     manager = CommandManager()
