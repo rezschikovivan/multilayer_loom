@@ -1,113 +1,121 @@
+from tkinter import END, IntVar, StringVar, Tk
 from unittest import TestCase, main
-from tkinter import Tk, IntVar, StringVar, END
 
-from loom.controller.input_feilds import IntFeild, LetterFeild, Command
+from loom.controller.command import CommandManager
+from loom.view.input_fields import IntField, LetterField
 
-class IntFeildTest(TestCase):
+
+class IntFieldTest(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.root = Tk()
         cls.var = IntVar()
-        cls.feild = IntFeild(cls.root, "TestIntEntry", cls.var)
-        cls.root.bind_all("<Control-z>", Command.manager.unexecute)
-        cls.root.bind_all("<Control-y>", Command.manager.reverse_unexecute)
-        cls.feild.widget.focus_set()
+        cls.commander = CommandManager()
+        cls.Field = IntField(cls.root, "TestIntEntry", cls.var, cls.commander)
+        cls.root.bind_all("<Control-z>", cls.commander.undo)
+        cls.root.bind_all("<Control-y>", cls.commander.redo)
+        cls.Field.widget.focus_set()
+
     @classmethod
     def tearDownClass(cls):
         if cls.root:
             cls.root.destroy()
-        
-    def setUp(self):
-        self.feild.widget.delete(0, END)
 
-    def test_intfeild_validation(self):
+    def setUp(self):
+        self.Field.widget.delete(0, END)
+
+    def test_intfield_validation(self):
         # try invalid input
-        self.feild.widget.insert(0,"ABC")
+        self.Field.widget.insert(0, "ABC")
         self.root.update()
-        self.feild.widget.event_generate("<Key-Return>")
+        self.Field.widget.event_generate("<Key-Return>")
         self.root.update()
         self.assertNotEqual(self.var.get(), "ABC")
 
         # valid input
-        self.feild.widget.delete(0, END)
-        self.feild.widget.insert(0,"112")
+        self.Field.widget.delete(0, END)
+        self.Field.widget.insert(0, "112")
         self.root.update()
-        self.feild.widget.event_generate("<Key-Return>")
+        self.Field.widget.event_generate("<Key-Return>")
         self.root.update()
         self.assertEqual(self.var.get(), 112)
 
-    def test_intfeild_reverse(self):
-        self.feild.widget.insert(0,"111")
+    def test_intfield_reverse(self):
+        self.Field.widget.insert(0, "111")
         self.root.update()
-        self.feild.widget.event_generate("<Key-Return>")
+        self.Field.widget.event_generate("<Key-Return>")
         self.root.update()
         self.assertEqual(self.var.get(), 111)
 
-        self.feild.widget.delete(0, END)
+        self.Field.widget.delete(0, END)
         self.root.update()
-        self.feild.widget.insert(0, "222")
+        self.Field.widget.insert(0, "222")
         self.root.update()
-        self.feild.widget.event_generate("<Key-Return>")
+        self.Field.widget.event_generate("<Key-Return>")
         self.root.update()
         self.assertEqual(self.var.get(), 222)
 
-        self.feild.widget.event_generate("<Control-z>")
+        self.Field.widget.event_generate("<Control-z>")
         self.assertEqual(self.var.get(), 111)
-        self.feild.widget.event_generate("<Control-y>")
+        self.Field.widget.event_generate("<Control-y>")
         self.assertEqual(self.var.get(), 222)
 
-class LetterFeildTest(TestCase):
+
+class LetterFieldTest(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.root = Tk()
         cls.var = StringVar()
-        cls.feild = LetterFeild(cls.root, "TestStringEntry", cls.var)
-        cls.root.bind_all("<Control-z>", Command.manager.unexecute)
-        cls.root.bind_all("<Control-y>", Command.manager.reverse_unexecute)
-        cls.feild.widget.focus_set()
+        cls.commander = CommandManager()
+        cls.Field = LetterField(cls.root, "TestIntEntry", cls.var, cls.commander)
+        cls.root.bind_all("<Control-z>", cls.commander.undo)
+        cls.root.bind_all("<Control-y>", cls.commander.redo)
+        cls.Field.widget.focus_set()
+
     @classmethod
     def tearDownClass(cls):
         if cls.root:
             cls.root.destroy()
-        
-    def setUp(self):
-        self.feild.widget.delete(0, END)
 
-    def test_intfeild_validation(self):
+    def setUp(self):
+        self.Field.widget.delete(0, END)
+
+    def test_letterfield_validation(self):
         # valid input
-        self.feild.widget.insert(0,"ABC")
+        self.Field.widget.insert(0, "ABC")
         self.root.update()
-        self.feild.widget.event_generate("<Key-Return>")
+        self.Field.widget.event_generate("<Key-Return>")
         self.root.update()
         self.assertEqual(self.var.get(), "ABC")
 
         # try invalid input
-        self.feild.widget.delete(0, END)
-        self.feild.widget.insert(0,"112")
+        self.Field.widget.delete(0, END)
+        self.Field.widget.insert(0, "112")
         self.root.update()
-        self.feild.widget.event_generate("<Key-Return>")
+        self.Field.widget.event_generate("<Key-Return>")
         self.root.update()
         self.assertNotEqual(self.var.get(), 112)
 
-    def test_intfeild_reverse(self):
-        self.feild.widget.insert(0,"A")
+    def test_letterfield_reverse(self):
+        self.Field.widget.insert(0, "A")
         self.root.update()
-        self.feild.widget.event_generate("<Key-Return>")
+        self.Field.widget.event_generate("<Key-Return>")
         self.root.update()
         self.assertEqual(self.var.get(), "A")
 
-        self.feild.widget.delete(0, END)
+        self.Field.widget.delete(0, END)
         self.root.update()
-        self.feild.widget.insert(0, "B")
+        self.Field.widget.insert(0, "B")
         self.root.update()
-        self.feild.widget.event_generate("<Key-Return>")
+        self.Field.widget.event_generate("<Key-Return>")
         self.root.update()
         self.assertEqual(self.var.get(), "B")
 
-        self.feild.widget.event_generate("<Control-z>")
+        self.Field.widget.event_generate("<Control-z>")
         self.assertEqual(self.var.get(), "A")
-        self.feild.widget.event_generate("<Control-y>")
+        self.Field.widget.event_generate("<Control-y>")
         self.assertEqual(self.var.get(), "B")
+
 
 if __name__ == "__main__":
     main()
