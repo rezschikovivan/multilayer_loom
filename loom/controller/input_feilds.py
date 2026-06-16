@@ -1,4 +1,4 @@
-from tkinter import Misc, W, Variable, END
+from tkinter import Misc, Variable, END
 from tkinter.ttk import Entry, Label
 from loom.controller.command import Command
 from abc import ABC, abstractmethod
@@ -57,7 +57,7 @@ class InputWiget(ABC):
     def create_title(self):
         """Place the feild title"""
         self._label = Label(self._root, text=self._name)
-        self._label.pack(anchor=W)
+        self._label.pack(anchor="w")
     def get_validatcommand(self):
         """Returns correct value for widget validatecommande"""
         return (self._root.register(self.validate), "%P")# set the method as a validation method
@@ -72,7 +72,7 @@ class InputWiget(ABC):
 class IntFeild(InputWiget):
     def create_widget(self):
         widget = Entry(self._root, validate="key", validatecommand=self.get_validatcommand())
-        widget.pack()
+        widget.pack(fill="x")
         return widget
     def validate(self, newvalue:str)->bool:
         if newvalue.isdigit() or newvalue == "": return True
@@ -84,7 +84,7 @@ class IntFeild(InputWiget):
 class LetterFeild(InputWiget):
     def create_widget(self):
         widget = Entry(self._root, validate="key", validatecommand=self.get_validatcommand())
-        widget.pack()
+        widget.pack(fill="x")
         return widget
     
     def validate(self, newvalue:str)->bool: 
