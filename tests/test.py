@@ -1,11 +1,11 @@
 from unittest import TestCase, main
 
-from loom.controller.command import BottomlessStack
+from loom.controller.command import bottomlessStack
 
 
-class BottomlessStackTest(TestCase):
+class bottomlessStackTest(TestCase):
     def test_botomless(self):
-        bs = BottomlessStack(2)
+        bs = bottomlessStack(2)
         for i in range(25):
             bs.append(i)
         self.assertEqual(len(bs), 2)

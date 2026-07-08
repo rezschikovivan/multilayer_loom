@@ -6,7 +6,7 @@ from loom.view.input_fields import EntryField, IntField
 
 
 class ParametrsPanel:
-    """Left user input pannel"""
+    """left user input pannel"""
 
     def __init__(self, root: Tk, profile: Profile, manager):
         self.root = Frame(master=root, borderwidth=1, relief=SOLID, padding=[8, 10])

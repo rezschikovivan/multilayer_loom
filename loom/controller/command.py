@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from tkinter import END, Event, Variable
 
 
-class BottomlessStack:
+class bottomlessStack:
     """Stack with auto clearing. If len arcoss the max_len, first item is deleting."""
 
     def __init__(self, max_len=10):
@@ -34,8 +34,8 @@ class CommandManager:
     """Manager each allows methods to manage the commands"""
 
     def __init__(self):
-        self.past_commands = BottomlessStack()
-        self.future_commands = BottomlessStack()
+        self.past_commands = bottomlessStack()
+        self.future_commands = bottomlessStack()
 
     def undo(self, event: Event):
         """Unexecute last command CTRL+Z"""
