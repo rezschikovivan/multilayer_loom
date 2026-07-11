@@ -1,14 +1,13 @@
 from tkinter import SOLID, Tk
 from tkinter.ttk import Button, Frame, Label
 
-from loom.model.profile_data import Profile
 from loom.view.input_fields import EntryField, IntField
 
 
 class ParametrsPanel:
     """left user input pannel"""
 
-    def __init__(self, root: Tk, profile: Profile, manager):
+    def __init__(self, root: Tk, profile, manager):
         self.root = Frame(master=root, borderwidth=1, relief=SOLID, padding=[8, 10])
         self.root.grid(row=0, column=0, rowspan=10, sticky="nsew")
         self.manager = manager

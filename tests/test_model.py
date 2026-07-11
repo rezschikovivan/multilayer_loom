@@ -32,7 +32,7 @@ class WeftsGridTest(TestCase):
         # для каждого теста создает сетку 2х2 утка 
         self.wefts_grid = WeftsGrid(None)
         self.args_false = (False, None)
-        self.args_true = (True, None)
+        self.args_true  = (True, None)
     
     def test_set_inactive(self):
         self.wefts_grid.set_inactive(0,0)
@@ -123,8 +123,81 @@ class WeftsGridTest(TestCase):
         self.assertListEqual(self.wefts_grid._wefts,  
         [[self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_false)],[self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)], [self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)]])
 
+    def test_top_repeating(self):
+        self.wefts_grid.increase(Side.top, 2)
+        self.assertListEqual(self.wefts_grid._wefts,
+        [[self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)],
+         [self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)]])
+
+        self.wefts_grid.reduce(Side.top, 2)
+        self.assertListEqual(self.wefts_grid._wefts,
+        [[self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)],
+         [self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)]])
+
+    def test_bottom_repeating(self):
+        self.wefts_grid.increase(Side.bottom, 2)
+        self.assertListEqual(self.wefts_grid._wefts,
+        [[self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)],
+         [self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)]])
+
+        self.wefts_grid.reduce(Side.bottom, 2)
+        self.assertListEqual(self.wefts_grid._wefts,
+        [[self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)],
+         [self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)]])
+
+
+    def test_right_repeating(self):
+        self.wefts_grid.increase(Side.right, repeat=2)
+        self.assertListEqual(self.wefts_grid._wefts,
+        [
+            [self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)],
+            [self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)],
+            [self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)],
+            [self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)]
+        ]
+        )
+
+        self.wefts_grid.reduce(Side.right, 2)
+        self.assertListEqual(self.wefts_grid._wefts,
+        [[self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)],
+         [self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)]])
+
+    def test_left_repeating(self):
+        self.wefts_grid.increase(Side.left, repeat=2)
+        self.assertListEqual(self.wefts_grid._wefts,
+        [
+            [self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)],
+            [self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)],
+            [self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)],
+            [self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)]
+        ]
+        )
+
+        self.wefts_grid.reduce(Side.left, 2)
+        self.assertListEqual(self.wefts_grid._wefts,
+        [[self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)],
+         [self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)]])
+
+
 class TestWarp(TestCase):
     def setUp(self):
-        self.warp = Warp(1)
+        self.warp = Warp(None, 5)
+
+    def test_init(self):
+        self.assertEqual(self.warp.length, 5)
+        self.assertEqual(self.warp.get_points(0), 
+                         [[0,0],[1,0],[2,0],[3,0],[4,0]])
+
+    def test_seting_anchor(self):
+        self.warp.set_anchor(0,)
+
+    def test_add_length(self):
+        self.warp._add_length(1, Side.right)
+        self.assertEqual(self.warp.length, 6)
+
+    def test_remove_lenth(self):
+        self.warp._remove_length(2)
+        self.assertEqual(self.warp.length, 3)
+
 if __name__ == "__main__":
     main()

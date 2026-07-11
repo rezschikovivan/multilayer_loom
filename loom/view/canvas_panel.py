@@ -1,8 +1,6 @@
 from tkinter import SOLID, Canvas, Frame
 from tkinter.ttk import Button
 
-from loom.model.profile_data import Profile
-
 
 class CanvasPanel:
     def __init__(self, root, profile: Profile):

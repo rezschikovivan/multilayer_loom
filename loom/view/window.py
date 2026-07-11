@@ -2,7 +2,6 @@ from platform import system
 from tkinter import PhotoImage, Tk
 
 from loom.controller.command import CommandManager
-from loom.model.profile_data import Profile
 from loom.view.params_panel import ParametrsPanel
 from loom.view.tab_menu import TabMenu
 
@@ -12,13 +11,13 @@ class Window:
 
     def __init__(self):
         self.root = Tk()
-        self.profile = Profile()
+        #self.profile = Profile()
         self.config_window()
         self.config_grid()
         self.root.protocol("WM_DELETE_WINDOW", self.exit)  # bind exit button click
         self.commander = CommandManager()
         self.menu = TabMenu(self.root)
-        self.parametrs_panel = ParametrsPanel(self.root, self.profile, self.commander)
+        #self.parametrs_panel = ParametrsPanel(self.root, self.profile, self.commander)
 
         # self.canvas_panel = CanvasPanel(self.root, self.profile)
         self.bind_z_y_btns()
