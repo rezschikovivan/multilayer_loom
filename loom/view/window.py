@@ -33,6 +33,7 @@ class Window:
         self.root.title("Многослойный ткацкий станок КГУ")
         icon = PhotoImage(file="icon.png")
         self.root.iconphoto(True, icon)
+        self.root.geometry(f"600x400")  # set usual size
 
         platform = system()
         if platform == "Windows":
