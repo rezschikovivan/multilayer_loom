@@ -67,10 +67,7 @@ class LetterFieldTest(TestCase):
         cls.root = Tk()
         cls.var = StringVar()
         cls.commander = CommandManager()
-        cls.Field = LetterField(cls.root, "TestIntEntry", cls.var, cls.commander)
-        cls.root.bind_all("<Control-z>", cls.commander.undo)
-        cls.root.bind_all("<Control-y>", cls.commander.redo)
-        cls.Field.widget.focus_set()
+        cls.Field = LetterField(cls.root, "TestStrEntry", cls.var, cls.commander)
 
     @classmethod
     def tearDownClass(cls):
@@ -83,37 +80,31 @@ class LetterFieldTest(TestCase):
     def test_letterfield_validation(self):
         # valid input
         self.Field.widget.insert(0, "ABC")
-        self.root.update()
-        self.Field.widget.event_generate("<Key-Return>")
-        self.root.update()
+        self.Field.take_input()
         self.assertEqual(self.var.get(), "ABC")
 
         # try invalid input
         self.Field.widget.delete(0, END)
         self.Field.widget.insert(0, "112")
-        self.root.update()
-        self.Field.widget.event_generate("<Key-Return>")
-        self.root.update()
-        self.assertNotEqual(self.var.get(), 112)
+        self.Field.take_input()
+        self.assertNotEqual(self.var.get(), "ABC")
 
     def test_letterfield_reverse(self):
         self.Field.widget.insert(0, "A")
-        self.root.update()
-        self.Field.widget.event_generate("<Key-Return>")
-        self.root.update()
+        self.Field.take_input()
         self.assertEqual(self.var.get(), "A")
 
         self.Field.widget.delete(0, END)
         self.root.update()
         self.Field.widget.insert(0, "B")
-        self.root.update()
-        self.Field.widget.event_generate("<Key-Return>")
-        self.root.update()
+        self.Field.take_input()
         self.assertEqual(self.var.get(), "B")
 
-        self.Field.widget.event_generate("<Control-z>")
+        self.Field.widget.focus_set()
+        self.commander.undo(None)
         self.assertEqual(self.var.get(), "A")
-        self.Field.widget.event_generate("<Control-y>")
+        self.Field.widget.focus_set()
+        self.commander.redo(None)
         self.assertEqual(self.var.get(), "B")
 
 

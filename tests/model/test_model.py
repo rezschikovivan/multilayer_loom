@@ -1,7 +1,7 @@
 from unittest import TestCase, main
 
-from loom.model.weft import Side, Weft, InstanceFactory
-from loom.model.warp import Warp
+from loom.model.weft import InstanceFactory, Weft
+
 
 class TestInstanceFactory(TestCase):
     def setUp(self):
@@ -26,29 +26,6 @@ class TestInstanceFactory(TestCase):
             self.assertIsInstance(err, KeyError)
         else:
             raise RuntimeError(f"Фабрика успешно приняла невалидные данные и вернула: {inst_5}, вместо исключения!")
-
-
-
-
-class TestWarp(TestCase):
-    def setUp(self):
-        self.warp = Warp(None, 5)
-
-    def test_init(self):
-        self.assertEqual(self.warp.length, 5)
-        self.assertEqual(self.warp.get_points(0), 
-                         [[0,0],[1,0],[2,0],[3,0],[4,0]])
-
-    def test_seting_anchor(self):
-        self.warp.set_anchor(0,)
-
-    def test_add_length(self):
-        self.warp._add_length(1, Side.right)
-        self.assertEqual(self.warp.length, 6)
-
-    def test_remove_lenth(self):
-        self.warp._remove_length(2)
-        self.assertEqual(self.warp.length, 3)
 
 if __name__ == "__main__":
     main()

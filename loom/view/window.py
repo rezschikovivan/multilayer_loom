@@ -2,7 +2,6 @@ from platform import system
 from tkinter import PhotoImage, Tk
 
 from loom.controller.command import CommandManager
-from loom.view.params_panel import ParametrsPanel
 from loom.view.tab_menu import TabMenu
 
 
@@ -33,7 +32,7 @@ class Window:
         self.root.title("Многослойный ткацкий станок КГУ")
         icon = PhotoImage(file="icon.png")
         self.root.iconphoto(True, icon)
-        self.root.geometry(f"600x400")  # set usual size
+        self.root.geometry("600x400")  # set usual size
 
         platform = system()
         if platform == "Windows":

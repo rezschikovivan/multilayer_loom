@@ -21,7 +21,6 @@ class EntryField(EnterGetable):
         self.receiver = receiver
         self.manager = manager
         self.create_title()
-        self.get_validatcommand()
         self._input_widget = self.create_widget()
         self.bind_enter()
 
@@ -58,7 +57,7 @@ class EntryField(EnterGetable):
         self._input_widget.bind("<Return>", self.take_input)
         self._input_widget.bind("<FocusOut>", self.take_input)
 
-    def take_input(self, event):
+    def take_input(self, event=None):
         GetEnterCommand(self, self.receiver, self.manager).execute()
 
     def get_enter(self):
@@ -79,9 +78,9 @@ class IntField(EntryField):
             return True
         return False
 
-    def get_enter(self):
+    def get_enter(self)->int:
         data = super().get_enter()
-        return data if data != "" else "0"
+        return int(data) if data != "" else 0
 
 
 class LetterField(EntryField):

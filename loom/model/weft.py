@@ -1,11 +1,5 @@
-from base import (
-    Side, 
-    Textile, 
-    TextileContainer, 
-    TextileType, 
-    Subject, 
-    InstanceFactory
-    )
+from loom.model.base import InstanceFactory, Side, Subject, Textile, TextileContainer, TextileType
+
 
 class Weft(Textile):
     """
@@ -35,7 +29,7 @@ class WeftsGrid(TextileContainer, Subject):
         self._weft_factory = InstanceFactory(Weft)
         super().__init__(textile_type)
         for _ in range(columns): # задает начальную сетку
-            self._wefts.append([self._weft_factory.get_instance(True, self._textile_type) for _ in range(rows)])
+             self._wefts.append([self._weft_factory.get_instance(True, self._textile_type) for _ in range(rows)])
 
     def __str__(self)->str:
         stroke = ""
@@ -64,6 +58,7 @@ class WeftsGrid(TextileContainer, Subject):
     
     def set_active(self, column_index:int, row_index:int):
         self._set_weft(column_index, row_index,self._weft_factory.get_instance(True, self._textile_type))
+
     def set_inactive(self, row_index:int, column_index:int):
         self._set_weft(column_index, row_index,self._weft_factory.get_instance(False, self._textile_type))
 

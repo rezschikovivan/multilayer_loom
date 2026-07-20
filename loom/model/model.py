@@ -1,6 +1,7 @@
-from base import TextileContainer, TextileType, InstanceFactory
-from weft import WeftsGrid
+from base import InstanceFactory, TextileContainer, TextileType
 from warp import WarpsLines
+from weft import WeftsGrid
+
 
 class FabricProfile(TextileContainer): 
     def __init__(self, textile_type:TextileType):

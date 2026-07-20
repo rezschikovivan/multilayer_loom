@@ -3,7 +3,7 @@ from tkinter.ttk import Button
 
 
 class CanvasPanel:
-    def __init__(self, root, profile: Profile):
+    def __init__(self, root, profile):
         self.root = Frame(master=root, borderwidth=1, relief=SOLID)
         self.root.grid(row=0, column=1, columnspan=5, rowspan=10, sticky="nsew")
         self.profile = profile
@@ -12,7 +12,7 @@ class CanvasPanel:
 
 
 class FabricGrid:
-    def __init__(self, root, profile: Profile):
+    def __init__(self, root, profile):
         self.profile_settings = profile
         self.root = root
         # self.create_grid(self.profile_settings.width.get(), self.profile_settings.height.get())

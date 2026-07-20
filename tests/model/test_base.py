@@ -1,7 +1,7 @@
-from unittest import TestCase 
+from unittest import TestCase
 
-from loom.model.weft import Weft
 from loom.model.base import InstanceFactory
+from loom.model.weft import Weft
 
 
 class TestInstanceFactory(TestCase):

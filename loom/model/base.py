@@ -1,6 +1,6 @@
-from enum import Enum
 from abc import ABC, abstractmethod
-from typing import Any, Generic, TypeVar
+from enum import Enum
+from typing import Any, TypeVar
 
 Side = Enum("Side", ("right","left", "top", "bottom"))
 
@@ -23,26 +23,31 @@ class Subject:
 class TextileType:
     pass
 
-class Textile(ABC):
+class Textile:
     """Базовый класс для всех элементов ткани"""
     def __init__(self, textile_type:"TextileType"):
-        self._textile_type:"TextileType" = textile_type
+        self._textile_type:TextileType = textile_type
         super().__init__()
 
-class TextileContainer(Textile):
+class TextileContainer(ABC, Textile):
     """
     Интерфейс составных объектов текстиля 
     """
     @abstractmethod
-    def increase(self, side:Side, target_value:int=1):
+    def increase(self, side:Side, repeat:int=1):
+        """
+        Добавляется новый элемент с тем же _textile_type
+        что и у контейнера.
+        """
         raise NotImplementedError()
     @abstractmethod
-    def reduce(self, side:Side, target_value:int=1):
+    def reduce(self, side:Side, repeat:int=1):
+        """Убавляются хранимые элементы. Не может опуститься ниже 1"""
         raise NotImplementedError()
     
 FactoryProduct = TypeVar("FactoryProduct")
 
-class InstanceFactory(Generic[FactoryProduct]):
+class InstanceFactory:
     """
     Экземпляры фабрики предоставляют единую точку доступа
     для получения экземпляров агрегируемого класса. \n
@@ -62,9 +67,9 @@ class InstanceFactory(Generic[FactoryProduct]):
             return self.__get_inst_by_key(constructor_args)
         try:
             instance = self.cls_to_instantiate(*constructor_args)
-        except TypeError:
+        except TypeError as err:
             raise KeyError(f"Не валидные аргументы: {constructor_args}," + 
-                           f"для создания экземпляра класса {self.cls_to_instantiate.__name__}")
+                           f"для создания экземпляра класса {self.cls_to_instantiate.__name__}") from err
         self.__append_inst(constructor_args, instance)
         return instance
     
