@@ -44,6 +44,17 @@ class TextileContainer(ABC, Textile):
     def reduce(self, side:Side, repeat:int=1):
         """Убавляются хранимые элементы. Не может опуститься ниже 1"""
         raise NotImplementedError()
+    @property
+    def textile_type(self):
+        return self._textile_type
+
+    @textile_type.setter
+    def textile_type(self, new_value:TextileType):
+        self._set_textile_type(new_value)
+
+    @abstractmethod
+    def _set_textile_type(self, new_textile):
+        raise NotImplementedError()
     
 FactoryProduct = TypeVar("FactoryProduct")
 

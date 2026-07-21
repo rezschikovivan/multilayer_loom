@@ -12,8 +12,6 @@ class IntFieldTest(TestCase):
         cls.var = IntVar()
         cls.commander = CommandManager()
         cls.Field = IntField(cls.root, "TestIntEntry", cls.var, cls.commander)
-        cls.root.bind_all("<Control-z>", cls.commander.undo)
-        cls.root.bind_all("<Control-y>", cls.commander.redo)
         cls.Field.widget.focus_set()
 
     @classmethod
@@ -23,6 +21,7 @@ class IntFieldTest(TestCase):
 
     def setUp(self):
         self.Field.widget.delete(0, END)
+        self.root.update()
 
     def test_intfield_validation(self):
         # try invalid input
@@ -55,9 +54,9 @@ class IntFieldTest(TestCase):
         self.root.update()
         self.assertEqual(self.var.get(), 222)
 
-        self.Field.widget.event_generate("<Control-z>")
+        self.commander.undo(None)
         self.assertEqual(self.var.get(), 111)
-        self.Field.widget.event_generate("<Control-y>")
+        self.commander.redo(None)
         self.assertEqual(self.var.get(), 222)
 
 

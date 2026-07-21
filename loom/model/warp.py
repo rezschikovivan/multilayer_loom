@@ -130,6 +130,10 @@ class WarpsLines(TextileContainer, Observer):
     def get_warp(self, line_index):
         return self.warps[line_index]
     
+    def _set_textile_type(self, new_textile):
+        for w in self.warps:
+            w._textile_type = new_textile
+
     @property
     def lines_count(self):
         return len(self.warps)

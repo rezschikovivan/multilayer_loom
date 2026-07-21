@@ -56,6 +56,11 @@ class WeftsGrid(TextileContainer, Subject):
     def row_width(self)->int:
         return self._wefts.__len__()
     
+    def _set_textile_type(self, new_textile):
+        for i in self._wefts:
+            for w in i:
+                w._textile_type = new_textile
+    
     def set_active(self, column_index:int, row_index:int):
         self._set_weft(column_index, row_index,self._weft_factory.get_instance(True, self._textile_type))
 
