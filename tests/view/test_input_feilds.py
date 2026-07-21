@@ -26,32 +26,24 @@ class IntFieldTest(TestCase):
     def test_intfield_validation(self):
         # try invalid input
         self.Field.widget.insert(0, "ABC")
-        self.root.update()
-        self.Field.widget.event_generate("<Key-Return>")
-        self.root.update()
+        self.Field.take_input()
         self.assertNotEqual(self.var.get(), "ABC")
 
         # valid input
         self.Field.widget.delete(0, END)
         self.Field.widget.insert(0, "112")
-        self.root.update()
-        self.Field.widget.event_generate("<Key-Return>")
-        self.root.update()
+        self.Field.take_input()
         self.assertEqual(self.var.get(), 112)
 
     def test_intfield_reverse(self):
         self.Field.widget.insert(0, "111")
-        self.root.update()
-        self.Field.widget.event_generate("<Key-Return>")
-        self.root.update()
+        self.Field.take_input()
         self.assertEqual(self.var.get(), 111)
 
         self.Field.widget.delete(0, END)
         self.root.update()
         self.Field.widget.insert(0, "222")
-        self.root.update()
-        self.Field.widget.event_generate("<Key-Return>")
-        self.root.update()
+        self.Field.take_input()
         self.assertEqual(self.var.get(), 222)
 
         self.commander.undo(None)
