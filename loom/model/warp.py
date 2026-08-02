@@ -1,7 +1,7 @@
 from numbers import Number
 from typing import TypeVar
 
-from loom.model.base import Observer, Side, Textile, TextileContainer, TextileType
+from loom.model.model_bases import Observer, Side, Textile, TextileContainer, TextileType
 from loom.model.weft import WeftsGrid
 
 x = TypeVar("x",bound=Number)
@@ -23,6 +23,9 @@ class Warp(Textile):
 
     def __repr__(self)->str:
         return f"Warp {id(self)} <{self.__str__()}>"
+
+    def __getitem__(self, key)->int:
+        return self.anchor_points[key]
 
     def get_points(self, warp_index:int = 0)->list[list[x,y]]:
         """При warp_index = 0 вернет список эквивалентный списку относительных точек (anchor_points)"""
@@ -81,6 +84,8 @@ class Warp(Textile):
 
     def _add_length(self, target_value:int, side:Side):
         "Путем добавления приводит длинну к указанному значению"
+        if side not in (Side.left, Side.right):
+            raise ValueError(f"Невозможно добавить длинну со стороны {side}, допустимы только: left, right!")
         if target_value <= self.length:
             raise ValueError(f"Нельзя методом добавляения уменьшить длинну. \
                              Целевое значение меньше текущего! {target_value} < {self.length}")
@@ -99,7 +104,7 @@ class Warp(Textile):
         for _ in range(self.length - target_value):
             self.anchor_points.pop(index)
 
-class WarpsLines(TextileContainer, Observer):
+class WarpLines(TextileContainer, Observer):
     """
     Составной объект основ. Представляет сосбой множество основ,
     которые содержат относительные данные о своей форме. Количество
@@ -107,14 +112,30 @@ class WarpsLines(TextileContainer, Observer):
     """
     def __init__(self, textile_type:TextileType, wefts_grid:WeftsGrid):
         super().__init__(textile_type)
-        self.warps:list[Warp] = []
+        self._warps:list[Warp] = []
         wefts_grid.register_observer(self)
         for _ in range(wefts_grid.column_height+1):
-            self.warps.append(Warp(self._textile_type, wefts_grid.row_width))
+            self._warps.append(Warp(self._textile_type, wefts_grid.row_width))
+
+    @property
+    def lines_count(self):
+        return len(self._warps)
+    @property
+    def length(self):
+        return len(self._warps[0].anchor_points)
+    @property
+    def warps_list(self):
+        return self._warps
+    @warps_list.setter
+    def warps_list(self, value):
+        self._warps = value
 
     def notify(self, grid:WeftsGrid, side:Side):
         """Получает уведомления при изменении сетки утков."""
         self.update_warps(grid, side)
+
+    def __getitem__(self, key)->Warp:
+        return self._warps[key]
 
     def update_warps(self, grid:WeftsGrid, side:Side):
         """Обновляет все хранимые основы и гарантирует, что обновлены будут все экземпляры"""
@@ -124,29 +145,24 @@ class WarpsLines(TextileContainer, Observer):
         elif wefts_add_one < self.lines_count:# высота уменьшилась
             self.reduce(side, self.lines_count-wefts_add_one)
 
-        for i in range(len(self.warps)):# обновляет все основы
-            self.warps[i].update(i, grid, side)
+        for i in range(len(self._warps)):# обновляет все основы
+            self._warps[i].update(i, grid, side)
     
     def get_warp(self, line_index):
-        return self.warps[line_index]
+        return self._warps[line_index]
     
     def _set_textile_type(self, new_textile):
-        for w in self.warps:
-            w._textile_type = new_textile
-
-    @property
-    def lines_count(self):
-        return len(self.warps)
-    @property
-    def warps_length(self):
-        return len(self.warps[0].anchor_points)
+        if self.textile_type is not new_textile:
+            self._textile_type = new_textile
+            for w in self._warps:
+                w._textile_type = self.textile_type
 
     def increase(self, side, repeats=1):
         for _ in range(repeats):
             if side == Side.top:
-                self.warps.append(Warp(self._textile_type, self.warps_length))
+                self._warps.append(Warp(self._textile_type, self.length))
             elif side == Side.bottom:
-                self.warps.insert(0, Warp(self._textile_type, self.warps_length))
+                self._warps.insert(0, Warp(self._textile_type, self.length))
             else:
                 raise ValueError(f"Невозможно добавить основы со стороны {side}, допустимы только: top, bottom!")
 
@@ -157,10 +173,10 @@ class WarpsLines(TextileContainer, Observer):
             return
         index = -1 if side == Side.top else 0
         for _ in range(repeats):
-            self.warps.pop(index)
+            self._warps.pop(index)
 
     def set_warp_anchor(self, line_index:int, column:x, target_line:y):
-        warp = self.warps[line_index]
+        warp = self._warps[line_index]
         warp.set_anchor(line_index, column, target_line)
         warp.update_anchors(line_index, self.lines_count-1)
 

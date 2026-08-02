@@ -1,24 +1,24 @@
 from platform import system
 from tkinter import PhotoImage, Tk
 
+from loom.model.model import FabricProfile
 from loom.controller.command import CommandManager
 from loom.view.tab_menu import TabMenu
-
+from loom.view.canvas_panel import CanvasPanel
 
 class Window:
     """Main program window"""
 
-    def __init__(self):
+    def __init__(self, profile:FabricProfile):
         self.root = Tk()
-        #self.profile = Profile()
         self.config_window()
         self.config_grid()
         self.root.protocol("WM_DELETE_WINDOW", self.exit)  # bind exit button click
         self.commander = CommandManager()
-        self.menu = TabMenu(self.root)
-        #self.parametrs_panel = ParametrsPanel(self.root, self.profile, self.commander)
 
-        # self.canvas_panel = CanvasPanel(self.root, self.profile)
+        self.menu = TabMenu(self.root)
+        self.canvas = CanvasPanel(self.root, profile)
+        
         self.bind_z_y_btns()
 
     def config_grid(self):

@@ -33,7 +33,7 @@ class WeftsGridTest(TestCase):
         self.assertEqual(self.wefts_grid.get_weft(1,1).is_active, True)
 
     def test_reduce_top(self):
-        self.wefts_grid.set_inactive(0,1)
+        self.wefts_grid.set_inactive(1,0)
         self.wefts_grid.reduce(Side.top)
         # проверяем что удалил сверху
         self.assertListEqual(self.wefts_grid._wefts, 
@@ -61,12 +61,12 @@ class WeftsGridTest(TestCase):
         self.wefts_grid.reduce(Side.left)
         # проверяем что удалил снизу
         self.assertListEqual(self.wefts_grid._wefts, 
-        [[self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)]])
+        [[self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_false)]])
 
         #не должен удалять строки в ноль
         self.wefts_grid.reduce(Side.left)
         self.assertListEqual(self.wefts_grid._wefts,  
-        [[self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_true)]])
+        [[self.wefts_grid._weft_factory.get_instance(*self.args_true), self.wefts_grid._weft_factory.get_instance(*self.args_false)]])
 
     def test_reduce_right(self):
         self.wefts_grid.set_inactive(0,0)

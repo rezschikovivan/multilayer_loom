@@ -1,7 +1,7 @@
 from tkinter import Misc, Variable
 from tkinter.ttk import Entry, Label
 
-from loom.controller.command import (
+from loom.controller.view_commads import (
     CommandManager,
     EnterGetable,
     GetEnterCommand,

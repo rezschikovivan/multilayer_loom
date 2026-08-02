@@ -1,5 +1,7 @@
 from loom.view.window import Window
+from loom.model.model import FabricProfile
 
-win = Window()
+fabric = FabricProfile(None)
+win = Window(fabric)
 
 win.run()

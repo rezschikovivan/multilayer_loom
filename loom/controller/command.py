@@ -1,5 +1,48 @@
 from abc import ABC, abstractmethod
-from tkinter import END, Event, Variable
+from tkinter import Event
+
+class Command(ABC):
+    """Abstract interface of "command" pattern"""
+
+    def __init__(self, manager: "CommandManager"):
+        self.manager = manager
+        self.last_state = None
+        self.new_state = None
+
+
+    def execute(self, *args, **kwds):
+        """Execute request and update states"""
+        if not self.is_changes():
+            return
+        self.set_states()
+        self.update_command_manager()
+        
+    @abstractmethod
+    def is_changes(self)->bool:
+        """
+        Возвращает True если команда несет какие либо изменения в состояние системы
+        иначе False. Реализация по умолчанию всегда восвращает True.
+        """
+        return True
+    @abstractmethod
+    def set_states(self):
+        """
+        Записывает состояние до и после изменения в перменнные last_state и new_state соответсвтенно, 
+        a так же применяет изменения к системе
+        """
+        raise NotImplementedError()
+    @abstractmethod
+    def undo(self):
+        """Reverse execute effect"""
+        raise NotImplementedError()
+    @abstractmethod
+    def redo(self):
+        """Reverse undo effect"""
+        raise NotImplementedError()
+    
+    def update_command_manager(self):
+        self.manager.future_commands.clear()
+        self.manager.past_commands.append(self)
 
 
 class BottomlessStack:
@@ -50,61 +93,3 @@ class CommandManager:
             cmnd: Command = self.future_commands.pop()
             cmnd.redo()
             self.past_commands.append(cmnd)
-
-
-class Command(ABC):
-    """Abstract interface of "command" pattern"""
-
-    def __init__(self, manager: CommandManager):
-        self.manager = manager
-        self.last_state = None
-        self.curr_state = None
-
-    @abstractmethod
-    def execute(self, *args, **kwds):
-        """Execute request and update states"""
-
-    @abstractmethod
-    def undo(self):
-        """Reverse execute effect"""
-
-    @abstractmethod
-    def redo(self):
-        """Reverse undo effect"""
-
-
-class EnterGetable(ABC):
-    @abstractmethod
-    def get_enter(self):
-        pass
-
-
-class GetEnterCommand(Command):
-    """Command to get user input in Fields. Can reverse changes and reverses.
-      Managed by CommandManager"""
-
-    def __init__(
-        self, field: EnterGetable, receiver: Variable, manager: CommandManager
-    ):
-        super().__init__(manager)
-        self.field = field
-        self.receiver = receiver
-
-    def execute(self, *args, **kwds):
-        if str(self.receiver.get()) == self.field.get_enter():
-            return  # Do nothing if value wasn`t change
-        self.last_state = self.receiver.get()
-        self.curr_state = self.field.get_enter()
-        self.receiver.set(self.curr_state)
-        self.manager.future_commands.clear()
-        self.manager.past_commands.append(self)
-
-    def undo(self):
-        self.receiver.set(self.last_state)
-        self.field.widget.delete(0, END)
-        self.field.widget.insert(0, str(self.last_state))
-
-    def redo(self):
-        self.receiver.set(self.curr_state)
-        self.field.widget.delete(0, END)
-        self.field.widget.insert(0, str(self.curr_state))

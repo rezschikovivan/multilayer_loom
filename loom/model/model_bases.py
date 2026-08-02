@@ -1,8 +1,20 @@
 from abc import ABC, abstractmethod
-from enum import Enum
+from enum import StrEnum
 from typing import Any, TypeVar
 
-Side = Enum("Side", ("right","left", "top", "bottom"))
+class MultiStrEnum(StrEnum):
+    """Строковое перечисление, с возможностью понимать разные регистры"""
+    @classmethod
+    def _missing_(cls, value):
+        if not isinstance(value, str):
+            return None
+        value_lower = value.strip().lower()
+        for member in cls:
+            if member.value.strip().lower() == value_lower:
+                return member
+        return None
+
+Side = MultiStrEnum("Side", ("right","left", "top", "bottom"))
 
 class Observer(ABC):
     @abstractmethod
@@ -34,14 +46,14 @@ class TextileContainer(ABC, Textile):
     Интерфейс составных объектов текстиля 
     """
     @abstractmethod
-    def increase(self, side:Side, repeat:int=1):
+    def increase(self, side:Side, repeats:int=1):
         """
         Добавляется новый элемент с тем же _textile_type
         что и у контейнера.
         """
         raise NotImplementedError()
     @abstractmethod
-    def reduce(self, side:Side, repeat:int=1):
+    def reduce(self, side:Side, repeats:int=1):
         """Убавляются хранимые элементы. Не может опуститься ниже 1"""
         raise NotImplementedError()
     @property
