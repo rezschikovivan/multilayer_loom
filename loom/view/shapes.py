@@ -1,34 +1,23 @@
 from loom.view.canvas_bases import CanvasDepicter, Redrawable
 from abc import abstractmethod
-
-from tkinter import Event
+from loom.controller.command import Command
+from tkinter import Event, Button
 
 # Базовые классы визуальных элементов холста
 
-class GridableView(Redrawable):
-    """
-    Базовый класс описывабщий графические обьекты на холсте.
-    Которые можно расположить по сетке колонок и строчек.
-    """
-    def __init__(self, depicter:CanvasDepicter, column, row):
+class BaseView(Redrawable):
+    def __init__(self, depicter:CanvasDepicter):
         self.depicter = depicter
-        self.column = column
-        self.row = row
         self.depicter.add_redrawable(self)
         self.cnvs = depicter.get_canvas()
         self.redraw()
         self.cnvs.update()
 
-    @property
-    def x_step(self)->float:
-        return self.column*self.depicter.x_intervale
-    @property
-    def y_step(self)->float:
-        return self.row*self.depicter.y_intervale
-
     def redraw(self):
         """Перерисовывает объект"""
         self.id = self.draw()
+        if not isinstance(self.id, (int, str)):
+            raise TypeError("Метод draw подкласса BaseView должен возвращать идентефикатор рисунка на холсте: int или str")
         self.cnvs.tag_bind(self.id, "<Button-1>", self.on_click_left)
         self.cnvs.tag_bind(self.id, "<Button-3>", self.on_click_right)
 
@@ -44,8 +33,51 @@ class GridableView(Redrawable):
     def on_click_left(self, event:Event):
         """Обрабатывает нажатие левой кнопки мыши"""
         raise NotImplementedError()
+
+class GridableView(BaseView):
+    """
+    Базовый класс описывабщий графические обьекты на холсте.
+    Которые можно расположить по сетке колонок и строчек.
+    """
+    def __init__(self, depicter:CanvasDepicter, column, row):
+        self.column = column
+        self.row = row
+        super().__init__(depicter)
+
+    @property
+    def x_step(self)->float:
+        return self.column*self.depicter.x_intervale
+    @property
+    def y_step(self)->float:
+        return self.row*self.depicter.y_intervale
     
 # Конкретные подклассы
+#TO DO: использовать __slots__ для уменьшения занимаемой памяти вместо __dict__
+
+class WeftsButton(BaseView):
+    width_coeff = 0.01
+    height_coeff = 0.01
+    def __init__(self, depicter, x, y, cmnd_side, is_increase:bool, command:Command):
+        self.x= x
+        self.y = y
+        self.is_increase = is_increase
+        self.cmnd_side = cmnd_side
+        self.command = command
+        super().__init__(depicter)
+
+    def create_btn(self)->Button:
+        sign = "+" if self.is_increase else "-"
+        return Button(text=sign, command=self.command.execute, 
+                      width=int(self.width_coeff*self.depicter.x_intervale), 
+                      height=int(self.height_coeff*self.depicter.y_intervale))
+
+    def draw(self):
+        return self.cnvs.create_window(self.x, self.y, window=self.create_btn())
+
+    def on_click_right(self, event):
+        pass
+    def on_click_left(self, event):
+        pass
 
 class WarpView(GridableView):
     """Визуал описывающий основу"""
@@ -58,7 +90,7 @@ class WarpView(GridableView):
         super().__init__(depicter, column, row)
 
     def on_click_left(self, event):
-        self.depicter.set_current_warp(self)
+        self.depicter.set_selected_warp(self)
         
     def on_click_right(self, event):
         self.depicter.get_warp(self.level)
@@ -68,7 +100,8 @@ class WarpView(GridableView):
         y0 = self.y_step+(0.5*self.depicter.y_intervale)
         x1 = self.depicter.canvas.winfo_width()
         y1 = self.y_step+(0.5*self.depicter.y_intervale)
-        o_id = self.cnvs.create_line(x0, y0, x1, y1, fill=self.color, width=self.depicter.y_intervale*0.1)
+        thickness_coefficient = 0.1
+        o_id = self.cnvs.create_line(x0, y0, x1, y1, fill=self.color, width=self.depicter.y_intervale*thickness_coefficient)
         self.cnvs.create_text((x0+x1)*0.5, (y0+y1)*0.5, text=f"index: {self.level}", fill="#FF0000")
         return o_id
 

@@ -1,5 +1,5 @@
 from unittest import TestCase
-from loom.model.model import FabricProfile
+from loom.model import FabricProfile
 from loom.controller.model_interact import (
     SetWarpAnchorCommand, CommandManager,
     IncreaseWeftsCommand, ReduceWeftsCommand,
@@ -179,7 +179,7 @@ class TesrToggleWeftCommand(TestCase):
         self.assertEqual(self.profile.get_weft(0,0).is_active, False)
 
     def test_undo_redo_false_input(self):
-        self.profile.wefts.set_inactive(1,1)
+        self.profile.grid.set_inactive(1,1)
         self.assertEqual(self.profile.get_weft(1,1).is_active, False)
 
         cmnd = ToggleWeftCommand(self.profile, 1, 1, self.manager)

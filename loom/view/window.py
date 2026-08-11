@@ -1,7 +1,7 @@
 from platform import system
 from tkinter import PhotoImage, Tk
 
-from loom.model.model import FabricProfile
+from loom.model import FabricProfile
 from loom.controller.command import CommandManager
 from loom.view.tab_menu import TabMenu
 from loom.view.canvas_panel import CanvasPanel
@@ -14,10 +14,11 @@ class Window:
         self.config_window()
         self.config_grid()
         self.root.protocol("WM_DELETE_WINDOW", self.exit)  # bind exit button click
-        self.commander = CommandManager()
+        self.manager = CommandManager()
 
         self.menu = TabMenu(self.root)
-        self.canvas = CanvasPanel(self.root, profile)
+
+        self.canvas = CanvasPanel(self.root, profile, self.manager)
         
         self.bind_z_y_btns()
 
@@ -44,8 +45,8 @@ class Window:
 
     def bind_z_y_btns(self):
         """Bind undo and reverse undo buttons"""
-        self.root.bind_all("<Control-z>", self.commander.undo)
-        self.root.bind_all("<Control-y>", self.commander.redo)
+        self.root.bind_all("<Control-z>", self.manager.undo)
+        self.root.bind_all("<Control-y>", self.manager.redo)
 
     def exit(self):
         """Catch exit button click"""

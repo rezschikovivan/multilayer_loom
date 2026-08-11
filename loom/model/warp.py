@@ -27,12 +27,16 @@ class Warp(Textile):
     def __getitem__(self, key)->int:
         return self.anchor_points[key]
 
+    def get_point(self, warp_index:int, column)->list[x,y]:
+        return [column, warp_index + self.anchor_points[column]]
+
     def get_points(self, warp_index:int = 0)->list[list[x,y]]:
-        """При warp_index = 0 вернет список эквивалентный списку относительных точек (anchor_points)"""
+        """При warp_index = 0 вернет список эквивалентный списку относительных точек экземпляра (anchor_points)"""
         points = []
         for i in range(len(self.anchor_points)):
-            points.append([i, warp_index + self.anchor_points[i]])
+            points.append(self.get_point(warp_index, i))
         return points
+    
     @property
     def length(self):
         return len(self.anchor_points)
@@ -97,6 +101,8 @@ class Warp(Textile):
 
     def _remove_length(self, target_value:int, side:Side):
         "Путем удаления приводит длинну к переданному значению"
+        if side not in (Side.left, Side.right):
+            raise ValueError(f"Невозможно добавить длинну со стороны {side}, допустимы только: left, right!")
         if target_value >= self.length and target_value > 0:
             raise ValueError(f"Нельзя методом уменьшения добавить длинну. \
                              Целевое значение больше текущего! {target_value} > {self.length}")
@@ -106,16 +112,16 @@ class Warp(Textile):
 
 class WarpLines(TextileContainer, Observer):
     """
-    Составной объект основ. Представляет сосбой множество основ,
+    Составной объект основ. Представляет собой множество основ,
     которые содержат относительные данные о своей форме. Количество
     основы на 1 больше чем высота утков.
     """
-    def __init__(self, textile_type:TextileType, wefts_grid:WeftsGrid):
+    def __init__(self, textile_type:TextileType, width,  height):
         super().__init__(textile_type)
         self._warps:list[Warp] = []
-        wefts_grid.register_observer(self)
-        for _ in range(wefts_grid.column_height+1):
-            self._warps.append(Warp(self._textile_type, wefts_grid.row_width))
+        
+        for _ in range(height+1):
+            self._warps.append(Warp(self._textile_type, width))
 
     @property
     def lines_count(self):

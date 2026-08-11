@@ -27,6 +27,12 @@ class Redrawer:
         for redrawable in self._to_redraw:
             redrawable.redraw()
 
+    def del_all_redrawable(self):
+        """
+        Отчищает список объектов для перерисовки, тем самым предотвращая утечки памяти.
+        """
+        self._to_redraw: list[Redrawable] = []
+
 class RainbowColorsGen:
     """Генератор возвращающий цвета ррадуги по очереди"""
     def __init__(self):
@@ -57,10 +63,10 @@ class ResizableCanvas(Redrawer):
         self.redraw_duration_ms: int = 100
         self._after_id = None
         self.can_be_redrawed: bool = False
-        self.main_root.bind("<Expose>", self.on_resizing)
+        self.main_root.bind("<Expose>", self.__on_resizing)
     @abstractmethod
     def redraw_on_resize(self):
-        """Включает перерисовку при изменении размеров окна"""
+        """Перерисовывает изображение при изменении размеров окна"""
         raise NotImplementedError()
 
     def __redraw(self):
@@ -68,7 +74,7 @@ class ResizableCanvas(Redrawer):
         self.redraw_on_resize()
         self.can_be_redrawed = True
     
-    def on_resizing(self, event:Event):
+    def __on_resizing(self, event:Event):
         """Срабатывает при изменении размеров окна"""
         if event.widget is self.main_root and self.can_be_redrawed:
             if getattr(self, "_after_id", None):
@@ -95,7 +101,7 @@ class CanvasDepicter(ResizableCanvas):
         self.columns:int = columns
 
     @abstractmethod
-    def set_current_warp(self, warp_view):
+    def set_selected_warp(self, warp_view):
         raise NotImplementedError()
     @abstractmethod
     def get_canvas(self)->Canvas:

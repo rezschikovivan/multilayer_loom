@@ -1,5 +1,7 @@
 from loom.model.model_bases import InstanceFactory, Side, Subject, Textile, TextileContainer, TextileType
 from loom_logger import get_logger
+
+
 class Weft(Textile):
     """
     Утóк. Класс приспособленец, поддерживает два состояния утка: активное и неактивное.
@@ -9,7 +11,12 @@ class Weft(Textile):
         self.is_active = is_active
         super().__init__(textile_type)
     def __str__(self)->str:
-        return f"Weft<{self.is_active}>{id(self)}"
+        """Возвращает строковое предстваление одной длинны для любого состоянния"""
+        if self.is_active:
+            return f"Weft<{self.is_active}> {id(self)}"
+        else:
+            return f"Weft<{self.is_active}>{id(self)}"
+    
     def __repr__(self)->str:
         return self.__str__()
 
@@ -35,19 +42,20 @@ class WeftsGrid(TextileContainer, Subject):
         stroke = ""
         #header
         for i in range(self.row_width):
-            stroke += f"    [ {self.get_weft(i,0)}   "
+            stroke += f"    [ {self.get_weft(i, self.column_height-1)},   "
         #body
-        for i in range(1,self.column_height-1):
+        for i in range(self.column_height-1, 1, -1):
             stroke += "\n"
-            for _ in range(self.row_width):
-                stroke += f"      {self.get_weft(i,0)}   "
+            for j in range(self.row_width):
+                stroke += f"      {self.get_weft(j, i)},   "
         stroke += "\n"
         #down
         for i in range(self.row_width):
-            stroke += f"      {self.get_weft(i,0)} ],"
+            stroke += f"      {self.get_weft(i,0)} ] ,"
         return "[\n" + stroke[:len(stroke)-1] + "\n]"
+    
     def __repr__(self):
-        return self.__str__()
+        return f"WeftsGrid<{self.row_width}x{self.column_height}> {id(self)}"
 
     @property
     def column_height(self)->int:
@@ -55,12 +63,14 @@ class WeftsGrid(TextileContainer, Subject):
     @property
     def row_width(self)->int:
         return self._wefts.__len__()
-    @property
-    def wefts_list(self):
+
+    def get_wefts_list(self)->list:
         return self._wefts
-    @wefts_list.setter
-    def wefts_list(self, value):
-        self._wefts = value
+
+    def set_wefts_list(self, new_wefts:list, side:Side):
+        if new_wefts != self._wefts:
+            self._wefts = new_wefts
+            self.notify_observers(self, Side(side))
     
     def _set_textile_type(self, new_textile):
         if self.textile_type is not new_textile:
@@ -81,25 +91,31 @@ class WeftsGrid(TextileContainer, Subject):
     def _set_weft(self, column_index:int, row_index:int, value:Weft):
         self._wefts[column_index][-(row_index+1)] = value
 
-    def increase(self, side:"Side", repeat:int=1):
+    def increase(self, side:"Side"|str, repeat:int=1):
         side = Side(side)
         if side in (Side.left, Side.right):
             self._increment_column(side, repeat)
         elif side in (Side.top, Side.bottom):
             self._increment_row(side, repeat)
 
-    def reduce(self, side:"Side", repeat:int=1):
+    def reduce(self, side:"Side"|str, repeat:int=1):
         side = Side(side)
+        if not self.can_be_reduced(side, repeat):
+            raise ValueError(
+                f"Нельзя уменьшить размеры сетки утков меньше минимального: {self.minsize} по любой из сторон. "+
+                  f"Текущее состояние: {self.__repr__()}, попытка уменьшить на {repeat} со стороны {side}")
         if side in (Side.left, Side.right):
-            if repeat > self.row_width:
-                repeat = self.row_width - self.minsize
-                get_logger("WeftsGrid").warning(f"Попытка удалить утки в ноль по горизонтали привела к уменьшению сетки утков до минимально возможной: {self.minsize}x{self.minsize}")
             self._decrement_column(side, repeat)
         elif side in (Side.top, Side.bottom):
-            if repeat > self.column_height:
-                repeat = self.column_height - self.minsize
-                get_logger("WeftsGrid").warning(f"Попытка удалить утки в ноль по горизонтали привела к уменьшению сетки утков до минимально возможной: {self.minsize}x{self.minsize}")
             self._decrement_row(side, repeat)
+
+    def can_be_reduced(self, side:Side|str, repeat:int = 1)->bool:
+        side = Side(side)
+        if side in (Side.bottom, Side.top) and self.column_height - repeat < self.minsize:
+            return False
+        elif side in (Side.right, Side.left) and self.row_width - repeat < self.minsize:
+            return False
+        return True
 
     def _increment_column(self, side:"Side", repeat:int ):
         """Добавляет новую колонку утков по указанной стороне"""

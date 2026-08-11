@@ -77,8 +77,8 @@ class CommandManager:
     """Manager each allows methods to manage the commands"""
 
     def __init__(self):
-        self.past_commands = BottomlessStack()
-        self.future_commands = BottomlessStack()
+        self.past_commands = BottomlessStack(30)
+        self.future_commands = BottomlessStack(30)
 
     def undo(self, event: Event):
         """Unexecute last command CTRL+Z"""

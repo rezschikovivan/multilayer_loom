@@ -26,8 +26,10 @@ class Subject:
         self.observers: list[Observer] = []
     def register_observer(self, o: Observer):
         self.observers.append(o)
+
     def remove_observer(self, o: Observer):
         self.observers.remove(o)
+        
     def notify_observers(self, grid, side:Side):
         for o in self.observers:
             o.notify(grid, side)
@@ -91,7 +93,7 @@ class InstanceFactory:
         try:
             instance = self.cls_to_instantiate(*constructor_args)
         except TypeError as err:
-            raise KeyError(f"Не валидные аргументы: {constructor_args}," + 
+            raise TypeError(f"Не валидные аргументы: {constructor_args}," + 
                            f"для создания экземпляра класса {self.cls_to_instantiate.__name__}") from err
         self.__append_inst(constructor_args, instance)
         return instance
