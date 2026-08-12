@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from loom.controller.command import Command, CommandManager
-from tkinter import END, Variable, Entry
+from tkinter import END, Entry, Variable
+
+from loom.controller import Command, CommandManager
 
 
 class EnterGetable(ABC):
@@ -27,16 +28,16 @@ class GetEnterCommand(Command):
         return not str(self.receiver.get()) == self.field.get_enter()
 
     def set_states(self):
-        self.last_state = self.receiver.get()
-        self.new_state = self.field.get_enter()
-        self.receiver.set(self.new_state)        
+        self.last_memento = self.receiver.get()
+        self.new_memento = self.field.get_enter()
+        self.receiver.set(self.new_memento)        
 
     def undo(self):
-        self.receiver.set(self.last_state)
+        self.receiver.set(self.last_memento)
         self.field.widget.delete(0, END)
-        self.field.widget.insert(0, str(self.last_state))
+        self.field.widget.insert(0, str(self.last_memento))
 
     def redo(self):
-        self.receiver.set(self.new_state)
+        self.receiver.set(self.new_memento)
         self.field.widget.delete(0, END)
-        self.field.widget.insert(0, str(self.new_state))
+        self.field.widget.insert(0, str(self.new_memento))

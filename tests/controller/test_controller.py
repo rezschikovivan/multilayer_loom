@@ -1,6 +1,6 @@
 from unittest import TestCase, main
 
-from loom.controller.command import BottomlessStack
+from loom.controller import BottomlessStack
 
 
 class BottomlessStackTest(TestCase):

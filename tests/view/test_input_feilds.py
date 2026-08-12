@@ -1,7 +1,7 @@
 from tkinter import END, IntVar, StringVar, Tk
 from unittest import TestCase, main
 
-from loom.controller.command import CommandManager
+from loom.controller import CommandManager
 from loom.view.input_widgets import IntField, LetterField
 
 

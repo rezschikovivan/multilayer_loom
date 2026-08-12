@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from tkinter import Canvas, Event
-from tkinter import Tk
-from typing import Generator
+from collections.abc import Generator
+from tkinter import Canvas, Event, Tk
+
 
 class Redrawable(ABC):
     """Интерфейс объектов которые перерисовщик Redrawer может перерисовать"""
@@ -48,8 +48,7 @@ class RainbowColorsGen:
 
     def __color_generator(self)->Generator[str]:
         while True:
-            for color in self.rainbow_colors:
-                yield color
+            yield from self.rainbow_colors
 
     def __next__(self):
         """Возвращает слкдующий цвет радуги"""

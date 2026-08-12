@@ -1,20 +1,26 @@
 from abc import ABC, abstractmethod
 from tkinter import Event
 
+from loom.model.memo import Memento, Originator
+
+
 class Command(ABC):
     """Abstract interface of "command" pattern"""
 
-    def __init__(self, manager: "CommandManager"):
+    def __init__(self, manager: "CommandManager", originator:Originator, *memento_args):
         self.manager = manager
-        self.last_state = None
-        self.new_state = None
-
+        self._originator = originator
+        self.memento_args = memento_args
+        self.last_memento: Memento = None
+        self.new_memento:  Memento = None
 
     def execute(self, *args, **kwds):
         """Execute request and update states"""
         if not self.is_changes():
             return
-        self.set_states()
+        self.last_memento = self._originator.create_memento(*self.memento_args)
+        self.action()
+        self.new_memento = self._originator.create_memento(*self.memento_args)
         self.update_command_manager()
         
     @abstractmethod
@@ -24,26 +30,25 @@ class Command(ABC):
         иначе False. Реализация по умолчанию всегда восвращает True.
         """
         return True
+
     @abstractmethod
-    def set_states(self):
+    def action(self):
         """
-        Записывает состояние до и после изменения в перменнные last_state и new_state соответсвтенно, 
-        a так же применяет изменения к системе
+        Выполняет действие производимое над объектом-хозяином
         """
         raise NotImplementedError()
-    @abstractmethod
+    
     def undo(self):
-        """Reverse execute effect"""
-        raise NotImplementedError()
-    @abstractmethod
+        """Отменяте выполнение команды"""
+        self._originator.set_memento(self.last_memento)
+    
     def redo(self):
-        """Reverse undo effect"""
-        raise NotImplementedError()
+        """Отменяет отмену выполнения команды"""
+        self._originator.set_memento(self.new_memento)
     
     def update_command_manager(self):
         self.manager.future_commands.clear()
         self.manager.past_commands.append(self)
-
 
 class BottomlessStack:
     """Stack with auto clearing. If len arcoss the max_len, first item is deleting."""

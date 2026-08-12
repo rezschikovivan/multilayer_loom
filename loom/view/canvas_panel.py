@@ -1,8 +1,10 @@
-from loom.view.canvas_bases import RainbowColorsGen, CanvasDepicter
-from loom.model import FabricProfile, Side, Observer, WeftsGrid 
-from loom.view.shapes import WarpView, ClickArea, TopClickArea, BottomClickArea, WeftView, WeftsButton
-from loom.controller.model_interact import CommandManager, ReduceWeftsCommand, IncreaseWeftsCommand
 from tkinter import Tk
+
+from loom.controller import CommandManager, IncreaseWeftsCommand, ReduceWeftsCommand
+from loom.model import FabricProfile, Observer, Side, WeftsGrid
+from loom.view.canvas_bases import CanvasDepicter, RainbowColorsGen
+from loom.view.shapes import BottomClickArea, ClickArea, TopClickArea, WarpView, WeftsButton, WeftView
+
 
 class CanvasPanel(CanvasDepicter, Observer):
     def __init__(self, root:Tk, profile:FabricProfile, manager:CommandManager):
@@ -13,10 +15,10 @@ class CanvasPanel(CanvasDepicter, Observer):
         self.draw_profile()
 
     @property
-    def HEIGHT(self):
+    def height(self):
         return self.canvas.winfo_height()
     @property
-    def WIDTH(self):
+    def width(self):
         return self.canvas.winfo_width()
 
     def notify(self, grid:WeftsGrid, side):
@@ -43,8 +45,8 @@ class CanvasPanel(CanvasDepicter, Observer):
         self.redraw_all()
 
     def calculate_size_values(self):
-        self.x_intervale = self.WIDTH / (self.columns+1)
-        self.y_intervale = self.HEIGHT / (self.rows+1)
+        self.x_intervale = self.width / (self.columns+1)
+        self.y_intervale = self.height / (self.rows+1)
         self.radius = ((0.05 * self.y_intervale) + (0.05 * self.x_intervale ))/2
 
     def draw_profile(self):
@@ -84,7 +86,10 @@ class CanvasPanel(CanvasDepicter, Observer):
 
     def __draw_button(self, x, y, cmnd_side:Side, is_increase:bool):
         """Создает одну кнопку"""
-        action = IncreaseWeftsCommand(self.profile, cmnd_side, self.manager) if is_increase else ReduceWeftsCommand(self.profile, cmnd_side, self.manager)
+        if is_increase:
+            action = IncreaseWeftsCommand(self.profile, cmnd_side, self.manager)
+        else:
+            action = ReduceWeftsCommand(self.profile, cmnd_side, self.manager)
         WeftsButton(self, x,y, cmnd_side, is_increase, action)
         
     def get_canvas(self):

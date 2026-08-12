@@ -1,6 +1,6 @@
-from loom.model.model_bases import InstanceFactory, TextileContainer, TextileType, Observer
-from loom.model.warp import WarpLines, x, y
-from loom.model.weft import WeftsGrid, Side
+from loom.model.model_bases import InstanceFactory, Observer, TextileContainer, TextileType
+from loom.model.warp import WarpLines
+from loom.model.weft import Side, WeftsGrid
 
 
 class FabricProfile(TextileContainer): 
@@ -30,7 +30,7 @@ class FabricProfile(TextileContainer):
     def increase(self, side:Side, repeat=1):
         self.grid.increase(side, repeat)
     
-    def set_anchor(self, line_index:int, column:x, target_line:y):
+    def set_anchor(self, line_index:int, column, target_line):
         self.lines.set_warp_anchor(line_index, column, target_line)
 
     def get_warp(self, index:int):
@@ -51,6 +51,6 @@ class FabricProfile(TextileContainer):
         self.lines._set_textile_type(self.textile_type)
         self.grid._set_textile_type(self.textile_type)
 
-    def get_grid_size(self)->list[x,y]:
+    def get_grid_size(self)->list[int,int]:
         return [self.grid.row_width, self.grid.column_height]
 

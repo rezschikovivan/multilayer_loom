@@ -1,7 +1,6 @@
 import logging
 from logging.handlers import RotatingFileHandler
 
-
 LOG_FILE = "loom_logs.log"
 MAX_BYTES = 3 * 1024 * 1024 # Максимальный размер (3 МБ)
 BACKUP_COUNT = 3
@@ -16,7 +15,7 @@ def get_logger(name: str) -> logging.Logger:
         )
     file_handler.setLevel(logging.DEBUG)
 
-    log_format = f"%(asctime)s - %(levelname)s - [%(name)s] - %(filename)s.%(funcName)s: '%(message)s'"
+    log_format = "%(asctime)s - %(levelname)s - [%(name)s] - %(filename)s.%(funcName)s: '%(message)s'"
     date_format = "%Y-%m-%d %H:%M:%S"
     formatter = logging.Formatter(fmt=log_format, datefmt=date_format)
     file_handler.setFormatter(formatter)

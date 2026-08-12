@@ -1,10 +1,11 @@
 from platform import system
 from tkinter import PhotoImage, Tk
 
-from loom.model import FabricProfile
 from loom.controller.command import CommandManager
-from loom.view.tab_menu import TabMenu
+from loom.model.model import FabricProfile
 from loom.view.canvas_panel import CanvasPanel
+from loom.view.tab_menu import TabMenu
+
 
 class Window:
     """Main program window"""

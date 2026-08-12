@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from enum import StrEnum
 from typing import Any, TypeVar
 
+
 class MultiStrEnum(StrEnum):
     """Строковое перечисление, с возможностью понимать разные регистры"""
     @classmethod
@@ -14,6 +15,7 @@ class MultiStrEnum(StrEnum):
                 return member
         return None
 
+    
 Side = MultiStrEnum("Side", ("right","left", "top", "bottom"))
 
 class Observer(ABC):

@@ -1,10 +1,8 @@
 from unittest import TestCase
+
+from loom.controller import CommandManager, IncreaseWeftsCommand, ReduceWeftsCommand, SetWarpAnchorCommand, ToggleWeftCommand
 from loom.model import FabricProfile
-from loom.controller.model_interact import (
-    SetWarpAnchorCommand, CommandManager,
-    IncreaseWeftsCommand, ReduceWeftsCommand,
-    ToggleWeftCommand 
-    )
+
 
 class TestSetWarpAnchorCommand(TestCase):
     def setUp(self):    

@@ -1,13 +1,9 @@
-from numbers import Number
-from typing import TypeVar
-
+from loom.model.memo import Memento, Originator
 from loom.model.model_bases import Observer, Side, Textile, TextileContainer, TextileType
 from loom.model.weft import WeftsGrid
 
-x = TypeVar("x",bound=Number)
-y = TypeVar("y",bound=Number)
 
-class Warp(Textile):
+class Warp(Textile, Originator):
     """
     Основа. Класс компонент для WarpsLines. 
     Хранит относительную позицию основы.
@@ -27,10 +23,10 @@ class Warp(Textile):
     def __getitem__(self, key)->int:
         return self.anchor_points[key]
 
-    def get_point(self, warp_index:int, column)->list[x,y]:
+    def get_point(self, warp_index:int, column)->list[int,int]:
         return [column, warp_index + self.anchor_points[column]]
 
-    def get_points(self, warp_index:int = 0)->list[list[x,y]]:
+    def get_points(self, warp_index:int = 0)->list[list[int,int]]:
         """При warp_index = 0 вернет список эквивалентный списку относительных точек экземпляра (anchor_points)"""
         points = []
         for i in range(len(self.anchor_points)):
@@ -72,7 +68,7 @@ class Warp(Textile):
                 # вычесляется: максимальный индекс строки - базовый индекс основы  
                 self.anchor_points[i] = wefts_height - warp_index
         
-    def set_anchor(self, line_index:int, column:x, row:y):
+    def set_anchor(self, line_index:int, column:int, row:int):
         """
         Устанавливает основу по переданным координатам. 
         Сохраняет относительную координату от индекса линии до точки.
@@ -109,6 +105,13 @@ class Warp(Textile):
         index = -1 if side == Side.right else 0
         for _ in range(self.length - target_value):
             self.anchor_points.pop(index)
+
+    def set_memento(self, memento:Memento):
+        self.anchor_points = memento.get_state(self)
+
+    def create_memento(self)->Memento:
+        return Memento(self, self.anchor_points.copy())
+
 
 class WarpLines(TextileContainer, Observer):
     """
@@ -181,7 +184,7 @@ class WarpLines(TextileContainer, Observer):
         for _ in range(repeats):
             self._warps.pop(index)
 
-    def set_warp_anchor(self, line_index:int, column:x, target_line:y):
+    def set_warp_anchor(self, line_index:int, column:int, target_line:int):
         warp = self._warps[line_index]
         warp.set_anchor(line_index, column, target_line)
         warp.update_anchors(line_index, self.lines_count-1)

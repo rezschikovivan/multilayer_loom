@@ -1,7 +1,8 @@
-from loom.view.canvas_bases import CanvasDepicter, Redrawable
 from abc import abstractmethod
-from loom.controller.command import Command
-from tkinter import Event, Button
+from tkinter import Button, Event
+
+from loom.controller import Command
+from loom.view.canvas_bases import CanvasDepicter, Redrawable
 
 # Базовые классы визуальных элементов холста
 
