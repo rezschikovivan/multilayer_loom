@@ -6,8 +6,7 @@ from loom.model.weft import Side, WeftsGrid
 class FabricProfile(TextileContainer): 
     def __init__(self, textile_type:TextileType):
         self.grid = WeftsGrid(textile_type)
-        self.lines = WarpLines(textile_type, self.grid.row_width, self.grid_height)
-        self.register_grid_listener(self.lines)
+        self.lines = WarpLines(textile_type, self.grid)
         self.textile_type_factory = InstanceFactory(TextileType)
         super().__init__(textile_type)
     

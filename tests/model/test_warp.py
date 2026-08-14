@@ -177,22 +177,21 @@ class TestWarpLines(TestCase):
         #reduce
         self.wefts_grid.reduce(Side.top, 2)
         self.assertEqual(self.lines.lines_count, 4)
-        self.wefts_grid.reduce(Side.bottom, 2)
-        self.assertEqual(self.lines.lines_count, 2)
+        self.wefts_grid.reduce(Side.bottom, 1)
+        self.assertEqual(self.lines.lines_count, 3)
 
     def test_update_warps_by_wefts_grid(self):
         """Проверка измененя точек привязки основ при изменении сетки утков"""
         # при удалении сверху
-        self.lines.set_warp_anchor(0, 1, 2)
-        self.assertListEqual(self.lines._warps[0].anchor_points, [0,2])
+        self.wefts_grid.increase("top")
+        self.lines.set_warp_anchor(0, 1, 3)
+        self.assertListEqual(self.lines._warps[0].anchor_points, [0,3])
         self.wefts_grid.reduce(Side.top)
-        self.assertListEqual(self.lines._warps[0].anchor_points, [0,1])
+        self.assertListEqual(self.lines._warps[0].anchor_points, [0,2])
 
         self.setUp()
         self.wefts_grid.increase(Side.top, 2)# при добавлении никаких доп действий не предусмотрено
         self.lines.set_warp_anchor(4, 0, 0)
         self.assertListEqual(self.lines._warps[4].anchor_points, [-4,0])
-        self.wefts_grid.reduce(Side.bottom, 3)
-        self.assertListEqual(self.lines._warps[self.lines.lines_count-1].anchor_points, [-1,0])
-
-        #
+        self.wefts_grid.reduce(Side.bottom, 2)
+        self.assertListEqual(self.lines._warps[self.lines.lines_count-1].anchor_points, [-2,0])

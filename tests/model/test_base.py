@@ -21,9 +21,4 @@ class TestInstanceFactory(TestCase):
         inst_4 = self.factory.get_instance(*self.args_1)
         self.assertEqual(inst_3, inst_4)
 
-        try:
-            inst_5 = self.factory.get_instance(True, "Hello", {"HI":1})
-        except BaseException as err:
-            self.assertIsInstance(err, KeyError)
-        else:
-            raise RuntimeError(f"Фабрика успешно приняла невалидные данные и вернула: {inst_5}, вместо исключения!")
+        self.assertRaises(TypeError, self.factory.get_instance, True, "Hello", {"HI":1})

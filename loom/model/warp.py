@@ -119,12 +119,12 @@ class WarpLines(TextileContainer, Observer):
     которые содержат относительные данные о своей форме. Количество
     основы на 1 больше чем высота утков.
     """
-    def __init__(self, textile_type:TextileType, width,  height):
+    def __init__(self, textile_type:TextileType, grid:WeftsGrid):
         super().__init__(textile_type)
         self._warps:list[Warp] = []
-        
-        for _ in range(height+1):
-            self._warps.append(Warp(self._textile_type, width))
+        grid.register_observer(self)
+        for _ in range(grid.column_height+1):
+            self._warps.append(Warp(self._textile_type, grid.row_width))
 
     @property
     def lines_count(self):

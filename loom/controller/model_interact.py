@@ -41,7 +41,7 @@ class SetWarpAnchorCommand(Command):
                 f"Попытка установить основу на высоте {target_row} завершилась установкой на самую вернею строку, "+
                 f"т.к. превышает количество строк: {target_row} > {profile.lines_count}"
                    )
-        warp = self.profile.get_warp(self.warp_index)
+        warp = profile.get_warp(warp_index)
         super().__init__(manager, warp)
         self.profile = profile
         self.warp_index = warp_index

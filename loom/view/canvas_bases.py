@@ -33,27 +33,6 @@ class Redrawer:
         """
         self._to_redraw: list[Redrawable] = []
 
-class RainbowColorsGen:
-    """Генератор возвращающий цвета ррадуги по очереди"""
-    def __init__(self):
-        self.colors_generator = self.__color_generator()
-        self.rainbow_colors: list = [
-                "#ffadad",  "#ffd6a5",  "#fdffb6",  "#caffbf",  
-                "#9bf6ff",  "#a0c4ff",  "#bdb2ff",  "#ffc6ff"
-                ]
-
-    def next_color(self):
-        """Возвращает слкдующий цвет радуги"""
-        return next(self.colors_generator)
-
-    def __color_generator(self)->Generator[str]:
-        while True:
-            yield from self.rainbow_colors
-
-    def __next__(self):
-        """Возвращает слкдующий цвет радуги"""
-        return self.colors_generator.__next__()
-
 class ResizableCanvas(Redrawer):
     """Базовый класс для перерисовки канваса при изменении его размеров"""
     def __init__(self, main_root:Tk):
@@ -61,8 +40,9 @@ class ResizableCanvas(Redrawer):
         self.main_root = main_root
         self.redraw_duration_ms: int = 100
         self._after_id = None
-        self.can_be_redrawed: bool = False
+        self.can_be_redrawed: bool = True
         self.main_root.bind("<Expose>", self.__on_resizing)
+
     @abstractmethod
     def redraw_on_resize(self):
         """Перерисовывает изображение при изменении размеров окна"""
@@ -74,7 +54,7 @@ class ResizableCanvas(Redrawer):
         self.can_be_redrawed = True
     
     def __on_resizing(self, event:Event):
-        """Срабатывает при изменении размеров окна"""
+        """Срабатывает при изменении размеров окна, планирует в цикле событий перерисовк окна"""
         if event.widget is self.main_root and self.can_be_redrawed:
             if getattr(self, "_after_id", None):
                 self.main_root.after_cancel(self._after_id)
@@ -88,7 +68,7 @@ class CanvasDepicter(ResizableCanvas):
         if columns <= 0 or rows <= 0:
             raise ValueError(f"Количество колонок:строчек должно быть больше нуля, сейчас {columns}:{rows}")
         super().__init__(root)
-        self.canvas = Canvas(root, bg="white")
+        self.canvas = Canvas(root, bg="#FFFFFF")
         self.canvas.pack(anchor='center', expand=True, fill='both')
         self.canvas.update()
 
@@ -117,3 +97,24 @@ class CanvasDepicter(ResizableCanvas):
     @abstractmethod
     def get_weft(self, column, row):
         raise NotImplementedError()    
+
+class RainbowColorsGen:
+    """Генератор возвращающий цвета ррадуги по очереди"""
+    def __init__(self):
+        self.colors_generator = self.__color_generator()
+        self.rainbow_colors: list = [
+                "#ffadad",  "#ffd6a5",  "#fdffb6",  "#caffbf",  
+                "#9bf6ff",  "#a0c4ff",  "#bdb2ff",  "#ffc6ff"
+                ]
+
+    def next_color(self):
+        """Возвращает слкдующий цвет радуги"""
+        return next(self.colors_generator)
+
+    def __color_generator(self)->Generator[str]:
+        while True:
+            yield from self.rainbow_colors
+
+    def __next__(self):
+        """Возвращает слкдующий цвет радуги"""
+        return self.colors_generator.__next__()

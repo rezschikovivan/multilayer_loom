@@ -1,9 +1,9 @@
 from tkinter import Tk
-
+from math import sqrt
 from loom.controller import CommandManager, IncreaseWeftsCommand, ReduceWeftsCommand
 from loom.model import FabricProfile, Observer, Side, WeftsGrid
 from loom.view.canvas_bases import CanvasDepicter, RainbowColorsGen
-from loom.view.shapes import BottomClickArea, ClickArea, TopClickArea, WarpView, WeftsButton, WeftView
+from loom.view.shapes import BottomClickArea, ClickArea, TopClickArea, WarpView, WeftButton, WeftView
 
 
 class CanvasPanel(CanvasDepicter, Observer):
@@ -24,33 +24,35 @@ class CanvasPanel(CanvasDepicter, Observer):
     def notify(self, grid:WeftsGrid, side):
         self.columns = grid.row_width
         self.rows = grid.column_height
-        print(self.profile.grid)
         self.draw_profile()
 
     def set_selected_warp(self, warp_view:"WarpView"):
         """Устанавливает основу как выбранную"""
-        if self.active_line is warp_view:
-            self.active_line.change_color()# возвращаем предыдущий цвет основе
+        if warp_view is None:
+            raise ValueError("Основа не может быть выбрана, т.к. передали None!")
+        if self.active_line is warp_view:# ткнули на уже выбранную
+            self.active_line.change_color()
             self.active_line = None
             return
         if self.active_line is not None:
-            self.active_line.change_color()# возвращаем предыдущий цвет основе
+            self.active_line.change_color()#возвращаем цвет прошлой
         warp_view.change_color()
         self.active_line = warp_view
-        print(self.active_line)
 
     def redraw_on_resize(self):
+        """Перерисовывает существующие объекты"""
         self.canvas.delete("all")
         self.calculate_size_values()
         self.redraw_all()
 
     def calculate_size_values(self):
+        """Расчитывает размеры для текущего окна"""
         self.x_intervale = self.width / (self.columns+1)
         self.y_intervale = self.height / (self.rows+1)
-        self.radius = ((0.05 * self.y_intervale) + (0.05 * self.x_intervale ))/2
+        self.radius = 0.01*WeftView.radius_coeff * sqrt((self.y_intervale**2) * (self.x_intervale**2))/2
 
     def draw_profile(self):
-        self.can_be_redrawed = False
+        """Рисует профиль создавая объекты соответствующие модели"""
         self.del_all_redrawable()
         self.canvas.delete("all")
         self.calculate_size_values()
@@ -62,11 +64,10 @@ class CanvasPanel(CanvasDepicter, Observer):
             self.__create_warp_view(0, r, rainbow.next_color())
             for c in range(1, self.columns+1):
                 self.x_step = c*self.x_intervale
-                # распологаем кнопки и утки
-                self.__create_click_area(c, r)#первыми распологать зоны для нажатий
-                self.__create_weft_view(c, r)
+                # распологаем зоны нажатия и утки
+                self.__create_weft_view( c, r)
+                self.__create_click_area(c, r)
         self.__make_buttons_kit(self.x_intervale*0.5, self.y_intervale*0.25, Side.top)
-        self.can_be_redrawed = True
 
     def draw_buttons(self):
         # РАЗМЕЩАТЬ КНОПКИ ПО УГЛАМ ЦИКЛОМ
@@ -75,14 +76,11 @@ class CanvasPanel(CanvasDepicter, Observer):
             y = self.y_intervale*i*0.25
             self.__make_buttons_kit(x,y)
         
-                    
-
     def __make_buttons_kit(self, x, y, cmnd_side:Side):
         """Принимает координаты правой нижней точки кнопок"""
-        btn_h = WeftsButton.height_coeff*self.y_intervale
-        btn_w = WeftsButton.width_coeff*self.x_intervale
-        self.__draw_button(x-btn_w, y-btn_h, cmnd_side, True)
-        self.__draw_button(x-(2*btn_w), y-(2*btn_h), cmnd_side, False)
+        btn_side = min(self.x_intervale, self.y_intervale)*WeftButton.side_coeff
+        self.__draw_button(x-btn_side, y-btn_side, cmnd_side, True)
+        self.__draw_button(x-btn_side, y-(2*btn_side), cmnd_side, False)
 
     def __draw_button(self, x, y, cmnd_side:Side, is_increase:bool):
         """Создает одну кнопку"""
@@ -90,7 +88,7 @@ class CanvasPanel(CanvasDepicter, Observer):
             action = IncreaseWeftsCommand(self.profile, cmnd_side, self.manager)
         else:
             action = ReduceWeftsCommand(self.profile, cmnd_side, self.manager)
-        WeftsButton(self, x,y, cmnd_side, is_increase, action)
+        WeftButton(self, x,y, cmnd_side, is_increase, action)
         
     def get_canvas(self):
         return self.canvas
@@ -116,7 +114,7 @@ class CanvasPanel(CanvasDepicter, Observer):
     def __create_click_area(self, column:int, row:int):
         if row == 1:           # распологаем самый верхний ряд кнопок
             TopClickArea(self, column, row)
-        if row == self.columns:# распологаем самый нижний  ряд кнопок
+        if row == self.rows:# распологаем самый нижний  ряд кнопок
             BottomClickArea(self, column, row)
         else:
             ClickArea(self, column, row)

@@ -95,9 +95,14 @@ class TestReduceWeftsCommand(TestCase):
         cmnd.execute()
         self.assertEqual(self.profile.grid_height, 7)
 
-        cmnd = ReduceWeftsCommand(self.profile, "top", self.manager, 11)
+        cmnd = ReduceWeftsCommand(self.profile, "top", self.manager, 5)
         cmnd.execute()
         self.assertEqual(self.profile.grid_height, 2)
+
+        cmnd = ReduceWeftsCommand(self.profile, "top", self.manager, 3)
+        cmnd.execute()
+        self.assertEqual(self.profile.grid_height, 2)
+
 
     def test_reduce_bottom(self):
         self.assertEqual(self.profile.grid_height, 10)
@@ -110,7 +115,11 @@ class TestReduceWeftsCommand(TestCase):
         cmnd.execute()
         self.assertEqual(self.profile.grid_height, 7)
 
-        cmnd = ReduceWeftsCommand(self.profile, "bottom", self.manager, 8)
+        cmnd = ReduceWeftsCommand(self.profile, "bottom", self.manager, 5)
+        cmnd.execute()
+        self.assertEqual(self.profile.grid_height, 2)
+
+        cmnd = ReduceWeftsCommand(self.profile, "bottom", self.manager, 2)
         cmnd.execute()
         self.assertEqual(self.profile.grid_height, 2)
 
@@ -125,7 +134,11 @@ class TestReduceWeftsCommand(TestCase):
         cmnd.execute()
         self.assertEqual(self.profile.grid_width, 7)
 
-        cmnd = ReduceWeftsCommand(self.profile, "right", self.manager, 8)
+        cmnd = ReduceWeftsCommand(self.profile, "right", self.manager, 5)
+        cmnd.execute()
+        self.assertEqual(self.profile.grid_width, 2)
+
+        cmnd = ReduceWeftsCommand(self.profile, "right", self.manager, 1)
         cmnd.execute()
         self.assertEqual(self.profile.grid_width, 2)
 
@@ -140,7 +153,11 @@ class TestReduceWeftsCommand(TestCase):
         cmnd.execute()
         self.assertEqual(self.profile.grid_width, 7)
 
-        cmnd = ReduceWeftsCommand(self.profile, "RIGHT", self.manager, 8)
+        cmnd = ReduceWeftsCommand(self.profile, "LEFT", self.manager, 5)
+        cmnd.execute()
+        self.assertEqual(self.profile.grid_width, 2)
+        
+        cmnd = ReduceWeftsCommand(self.profile, "left", self.manager, 2)
         cmnd.execute()
         self.assertEqual(self.profile.grid_width, 2)
 
