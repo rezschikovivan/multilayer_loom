@@ -94,14 +94,14 @@ class WeftsGrid(TextileContainer, Subject, Originator):
     def _set_weft(self, column_index:int, row_index:int, value:Weft):
         self._wefts[column_index][-(row_index+1)] = value
 
-    def increase(self, side:"Side"|str, repeat:int=1):
+    def increase(self, side:Side|str, repeat:int=1):
         side = Side(side)
         if side in (Side.left, Side.right):
             self.__increment_column(side, repeat)
         elif side in (Side.top, Side.bottom):
             self.__increment_row(side, repeat)
 
-    def reduce(self, side:"Side"|str, repeat:int=1):
+    def reduce(self, side:Side|str, repeat:int=1):
         side = Side(side)
         if not self.can_be_reduced(side, repeat):
             raise ValueError(
