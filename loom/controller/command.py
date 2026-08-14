@@ -1,6 +1,54 @@
 from abc import ABC, abstractmethod
-from tkinter import END, Event, Variable
+from tkinter import Event
 
+from loom.model.memo import Memento, Originator
+
+
+class Command(ABC):
+    """Abstract interface of "command" pattern"""
+
+    def __init__(self, manager: "CommandManager", originator:Originator, *memento_args):
+        self.manager = manager
+        self._originator = originator
+        self.memento_args = memento_args
+        self.last_memento: Memento = None
+        self.new_memento:  Memento = None
+
+    def execute(self, *args, **kwds):
+        """Execute request and update states"""
+        if not self.is_changes():
+            return
+        self.last_memento = self._originator.create_memento(*self.memento_args)
+        self.action()
+        self.new_memento = self._originator.create_memento(*self.memento_args)
+        self.update_command_manager()
+        
+    @abstractmethod
+    def is_changes(self)->bool:
+        """
+        Возвращает True если команда несет какие либо изменения в состояние системы
+        иначе False. Реализация по умолчанию всегда восвращает True.
+        """
+        return True
+
+    @abstractmethod
+    def action(self):
+        """
+        Выполняет действие производимое над объектом-хозяином
+        """
+        raise NotImplementedError()
+    
+    def undo(self):
+        """Отменяте выполнение команды"""
+        self._originator.set_memento(self.last_memento)
+    
+    def redo(self):
+        """Отменяет отмену выполнения команды"""
+        self._originator.set_memento(self.new_memento)
+    
+    def update_command_manager(self):
+        self.manager.future_commands.clear()
+        self.manager.past_commands.append(self)
 
 class BottomlessStack:
     """Stack with auto clearing. If len arcoss the max_len, first item is deleting."""
@@ -34,8 +82,8 @@ class CommandManager:
     """Manager each allows methods to manage the commands"""
 
     def __init__(self):
-        self.past_commands = BottomlessStack()
-        self.future_commands = BottomlessStack()
+        self.past_commands = BottomlessStack(30)
+        self.future_commands = BottomlessStack(30)
 
     def undo(self, event: Event):
         """Unexecute last command CTRL+Z"""
@@ -50,61 +98,3 @@ class CommandManager:
             cmnd: Command = self.future_commands.pop()
             cmnd.redo()
             self.past_commands.append(cmnd)
-
-
-class Command(ABC):
-    """Abstract interface of "command" pattern"""
-
-    def __init__(self, manager: CommandManager):
-        self.manager = manager
-        self.last_state = None
-        self.curr_state = None
-
-    @abstractmethod
-    def execute(self, *args, **kwds):
-        """Execute request and update states"""
-
-    @abstractmethod
-    def undo(self):
-        """Reverse execute effect"""
-
-    @abstractmethod
-    def redo(self):
-        """Reverse undo effect"""
-
-
-class EnterGetable(ABC):
-    @abstractmethod
-    def get_enter(self):
-        pass
-
-
-class GetEnterCommand(Command):
-    """Command to get user input in Fields. Can reverse changes and reverses.
-      Managed by CommandManager"""
-
-    def __init__(
-        self, field: EnterGetable, receiver: Variable, manager: CommandManager
-    ):
-        super().__init__(manager)
-        self.field = field
-        self.receiver = receiver
-
-    def execute(self, *args, **kwds):
-        if str(self.receiver.get()) == self.field.get_enter():
-            return  # Do nothing if value wasn`t change
-        self.last_state = self.receiver.get()
-        self.curr_state = self.field.get_enter()
-        self.receiver.set(self.curr_state)
-        self.manager.future_commands.clear()
-        self.manager.past_commands.append(self)
-
-    def undo(self):
-        self.receiver.set(self.last_state)
-        self.field.widget.delete(0, END)
-        self.field.widget.insert(0, str(self.last_state))
-
-    def redo(self):
-        self.receiver.set(self.curr_state)
-        self.field.widget.delete(0, END)
-        self.field.widget.insert(0, str(self.curr_state))

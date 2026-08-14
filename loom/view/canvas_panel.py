@@ -1,39 +1,123 @@
-from tkinter import SOLID, Canvas, Frame
-from tkinter.ttk import Button
+from tkinter import Tk
+from math import sqrt
+from loom.controller import CommandManager, IncreaseWeftsCommand, ReduceWeftsCommand
+from loom.model import FabricProfile, Observer, Side, WeftsGrid
+from loom.view.canvas_bases import CanvasDepicter, RainbowColorsGen
+from loom.view.shapes import BottomClickArea, ClickArea, TopClickArea, WarpView, WeftButton, WeftView
 
 
-class CanvasPanel:
-    def __init__(self, root, profile):
-        self.root = Frame(master=root, borderwidth=1, relief=SOLID)
-        self.root.grid(row=0, column=1, columnspan=5, rowspan=10, sticky="nsew")
+class CanvasPanel(CanvasDepicter, Observer):
+    def __init__(self, root:Tk, profile:FabricProfile, manager:CommandManager):
         self.profile = profile
-        self.root = Canvas(self.root)
-        FabricGrid(self.root, self.profile)
+        self.manager = manager
+        self.profile.register_grid_listener(self)
+        super().__init__(root, profile.grid_width, profile.grid_height)
+        self.draw_profile()
+
+    @property
+    def height(self):
+        return self.canvas.winfo_height()
+    @property
+    def width(self):
+        return self.canvas.winfo_width()
+
+    def notify(self, grid:WeftsGrid, side):
+        self.columns = grid.row_width
+        self.rows = grid.column_height
+        self.draw_profile()
+
+    def set_selected_warp(self, warp_view:"WarpView"):
+        """Устанавливает основу как выбранную"""
+        if warp_view is None:
+            raise ValueError("Основа не может быть выбрана, т.к. передали None!")
+        if self.active_line is warp_view:# ткнули на уже выбранную
+            self.active_line.change_color()
+            self.active_line = None
+            return
+        if self.active_line is not None:
+            self.active_line.change_color()#возвращаем цвет прошлой
+        warp_view.change_color()
+        self.active_line = warp_view
+
+    def redraw_on_resize(self):
+        """Перерисовывает существующие объекты"""
+        self.canvas.delete("all")
+        self.calculate_size_values()
+        self.redraw_all()
+
+    def calculate_size_values(self):
+        """Расчитывает размеры для текущего окна"""
+        self.x_intervale = self.width / (self.columns+1)
+        self.y_intervale = self.height / (self.rows+1)
+        self.radius = 0.01*WeftView.radius_coeff * sqrt((self.y_intervale**2) * (self.x_intervale**2))/2
+
+    def draw_profile(self):
+        """Рисует профиль создавая объекты соответствующие модели"""
+        self.del_all_redrawable()
+        self.canvas.delete("all")
+        self.calculate_size_values()
+        rainbow = RainbowColorsGen()
+
+        self.__create_warp_view(0, 0, rainbow.next_color())# распологаем самую верхнюю линию основы (нулевую)
+        for r in range(1, self.rows+1):
+            self.y_step = r*self.y_intervale
+            self.__create_warp_view(0, r, rainbow.next_color())
+            for c in range(1, self.columns+1):
+                self.x_step = c*self.x_intervale
+                # распологаем зоны нажатия и утки
+                self.__create_weft_view( c, r)
+                self.__create_click_area(c, r)
+        self.__make_buttons_kit(self.x_intervale*0.5, self.y_intervale*0.25, Side.top)
+
+    def draw_buttons(self):
+        # РАЗМЕЩАТЬ КНОПКИ ПО УГЛАМ ЦИКЛОМ
+        for i in range(1, self.columns+1, self.columns-1):# вверху сетки ->- внизу сетки
+            x = self.x_intervale*i*0.5
+            y = self.y_intervale*i*0.25
+            self.__make_buttons_kit(x,y)
+        
+    def __make_buttons_kit(self, x, y, cmnd_side:Side):
+        """Принимает координаты правой нижней точки кнопок"""
+        btn_side = min(self.x_intervale, self.y_intervale)*WeftButton.side_coeff
+        self.__draw_button(x-btn_side, y-btn_side, cmnd_side, True)
+        self.__draw_button(x-btn_side, y-(2*btn_side), cmnd_side, False)
+
+    def __draw_button(self, x, y, cmnd_side:Side, is_increase:bool):
+        """Создает одну кнопку"""
+        if is_increase:
+            action = IncreaseWeftsCommand(self.profile, cmnd_side, self.manager)
+        else:
+            action = ReduceWeftsCommand(self.profile, cmnd_side, self.manager)
+        WeftButton(self, x,y, cmnd_side, is_increase, action)
+        
+    def get_canvas(self):
+        return self.canvas
+
+    def set_warp(self, column, row):
+        print("Warp set")
+
+    def get_warp(self, warp_index):
+        print("Warp get")
+
+    def set_weft(self, column, row):
+        print("Weft set")
+
+    def get_weft(self, column, row):
+        print("Weft set")
+
+    def __create_weft_view(self, column, row):
+        WeftView(self, column, row)
+
+    def __create_warp_view(self, column, row, color):
+        WarpView(self, column, row, color)
+
+    def __create_click_area(self, column:int, row:int):
+        if row == 1:           # распологаем самый верхний ряд кнопок
+            TopClickArea(self, column, row)
+        if row == self.rows:# распологаем самый нижний  ряд кнопок
+            BottomClickArea(self, column, row)
+        else:
+            ClickArea(self, column, row)
 
 
-class FabricGrid:
-    def __init__(self, root, profile):
-        self.profile_settings = profile
-        self.root = root
-        # self.create_grid(self.profile_settings.width.get(), self.profile_settings.height.get())
-        self.create_grid(3, 3)
 
-    def create_grid(self, x: int, y: int):
-        for c in range(x):
-            for r in range(y):
-                btn = Button(text=f"{r},{c}")
-                btn.grid(row=r, column=c)
-
-
-# основа
-class Warp:
-    def __init__(self, layer: int):
-        self.base_layer = (
-            layer  # level at which the warp enters and exist fabric profile
-        )
-
-
-# уток
-class Weft:
-    def __init__(self):
-        self.involved = False  # participates in weaving

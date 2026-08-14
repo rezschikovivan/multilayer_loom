@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from loom.model.warp import Side, Warp, WarpsLines
+from loom.model.warp import Side, Warp, WarpLines
 from loom.model.weft import WeftsGrid
 
 
@@ -81,35 +81,35 @@ class TestWarp(TestCase):
 class TestWarpLines(TestCase):
     def setUp(self):
         self.wefts_grid = WeftsGrid(None, 2, 2)
-        self.lines = WarpsLines(None, self.wefts_grid)
+        self.lines = WarpLines(None, self.wefts_grid)
     
     def test_init(self):
         """
         Проверка корректности инициализациии списка основы
         должно быть на 1 больше чем высота сетки утков.
         """
-        self.assertEqual(self.lines.warps.__len__(), 3)
+        self.assertEqual(self.lines._warps.__len__(), 3)
 
     def test_get(self):
-        self.assertEqual(self.lines.warps[0], self.lines.get_warp(0))
+        self.assertEqual(self.lines._warps[0], self.lines.get_warp(0))
 
     def test_set_warp_anchor(self):
         """Проверак установки точек привязки основы"""
         index = 0
         self.lines.set_warp_anchor(index,0,1)
-        self.assertEqual(self.lines.warps[index].anchor_points, [1,0])
+        self.assertEqual(self.lines._warps[index].anchor_points, [1,0])
 
         self.lines.set_warp_anchor(index,0,100)
-        self.assertEqual(self.lines.warps[index].anchor_points, [2,0])
+        self.assertEqual(self.lines._warps[index].anchor_points, [2,0])
 
         index = 1 #  берем другую основу и проверяем корректность установки
         self.lines.set_warp_anchor(index,1,2)
-        self.assertEqual(self.lines.warps[index].anchor_points, [0,1])
+        self.assertEqual(self.lines._warps[index].anchor_points, [0,1])
 
         #установка отрицатиельного якоря относительно индекса основы
         index = 2
         self.lines.set_warp_anchor(index,0,0)
-        self.assertEqual(self.lines.warps[index].anchor_points, [-2,0])
+        self.assertEqual(self.lines._warps[index].anchor_points, [-2,0])
         
         #попытка ввода отрицательных точек
         self.assertRaises(ValueError, self.lines.set_warp_anchor, 0,-4,0)
@@ -129,9 +129,9 @@ class TestWarpLines(TestCase):
         warp_indx = 1
         self.lines.set_warp_anchor(warp_indx,1,2)
         self.lines.increase(Side.top)
-        self.assertEqual(self.lines.warps.__len__(), 4) # длина изменилась
+        self.assertEqual(self.lines._warps.__len__(), 4) # длина изменилась
         # точка не сдинулась т.к. добавили сверху
-        self.assertListEqual(self.lines.warps[warp_indx].anchor_points, [0,1])
+        self.assertListEqual(self.lines._warps[warp_indx].anchor_points, [0,1])
 
         # добавление снизу несколько раз
         warp_indx = 0
@@ -139,7 +139,7 @@ class TestWarpLines(TestCase):
         self.lines.increase(Side.bottom, 2)
         self.assertEqual(self.lines.lines_count, 6) # длина изменилась
         # точка сдинулась т.к. добавили снизу
-        self.assertListEqual(self.lines.warps[warp_indx].anchor_points, [0,0])
+        self.assertListEqual(self.lines._warps[warp_indx].anchor_points, [0,0])
 
     def test_reduce(self):
         """Проверка удаления основ"""
@@ -151,7 +151,7 @@ class TestWarpLines(TestCase):
         self.lines.set_warp_anchor(index,1,1)
         self.lines.reduce(Side.top)
         self.assertEqual(self.lines.lines_count, 2)
-        self.assertListEqual(self.lines.warps[index].anchor_points, [0,1])
+        self.assertListEqual(self.lines._warps[index].anchor_points, [0,1])
 
         self.setUp()
         # удаление снизу несколько раз
@@ -159,7 +159,7 @@ class TestWarpLines(TestCase):
         self.lines.set_warp_anchor(index, 0, 1)
         self.lines.reduce(Side.bottom, 2)
         self.assertEqual(self.lines.lines_count, 1)
-        self.assertListEqual(self.lines.warps[0].anchor_points, [-1,0])
+        self.assertListEqual(self.lines._warps[0].anchor_points, [-1,0])
         # удаления элементов в 0 не должно быть
         self.lines.reduce(Side.bottom)
         self.assertEqual(self.lines.lines_count, 1)
@@ -177,22 +177,21 @@ class TestWarpLines(TestCase):
         #reduce
         self.wefts_grid.reduce(Side.top, 2)
         self.assertEqual(self.lines.lines_count, 4)
-        self.wefts_grid.reduce(Side.bottom, 2)
-        self.assertEqual(self.lines.lines_count, 2)
+        self.wefts_grid.reduce(Side.bottom, 1)
+        self.assertEqual(self.lines.lines_count, 3)
 
     def test_update_warps_by_wefts_grid(self):
         """Проверка измененя точек привязки основ при изменении сетки утков"""
         # при удалении сверху
-        self.lines.set_warp_anchor(0, 1, 2)
-        self.assertListEqual(self.lines.warps[0].anchor_points, [0,2])
+        self.wefts_grid.increase("top")
+        self.lines.set_warp_anchor(0, 1, 3)
+        self.assertListEqual(self.lines._warps[0].anchor_points, [0,3])
         self.wefts_grid.reduce(Side.top)
-        self.assertListEqual(self.lines.warps[0].anchor_points, [0,1])
+        self.assertListEqual(self.lines._warps[0].anchor_points, [0,2])
 
         self.setUp()
         self.wefts_grid.increase(Side.top, 2)# при добавлении никаких доп действий не предусмотрено
         self.lines.set_warp_anchor(4, 0, 0)
-        self.assertListEqual(self.lines.warps[4].anchor_points, [-4,0])
-        self.wefts_grid.reduce(Side.bottom, 3)
-        self.assertListEqual(self.lines.warps[self.lines.lines_count-1].anchor_points, [-1,0])
-
-        #
+        self.assertListEqual(self.lines._warps[4].anchor_points, [-4,0])
+        self.wefts_grid.reduce(Side.bottom, 2)
+        self.assertListEqual(self.lines._warps[self.lines.lines_count-1].anchor_points, [-2,0])

@@ -1,8 +1,22 @@
 from abc import ABC, abstractmethod
-from enum import Enum
+from enum import StrEnum
 from typing import Any, TypeVar
 
-Side = Enum("Side", ("right","left", "top", "bottom"))
+
+class MultiStrEnum(StrEnum):
+    """Строковое перечисление, с возможностью понимать разные регистры"""
+    @classmethod
+    def _missing_(cls, value):
+        if not isinstance(value, str):
+            return None
+        value_lower = value.strip().lower()
+        for member in cls:
+            if member.value.strip().lower() == value_lower:
+                return member
+        return None
+
+    
+Side = MultiStrEnum("Side", ("right","left", "top", "bottom"))
 
 class Observer(ABC):
     @abstractmethod
@@ -14,8 +28,10 @@ class Subject:
         self.observers: list[Observer] = []
     def register_observer(self, o: Observer):
         self.observers.append(o)
+
     def remove_observer(self, o: Observer):
         self.observers.remove(o)
+        
     def notify_observers(self, grid, side:Side):
         for o in self.observers:
             o.notify(grid, side)
@@ -34,14 +50,14 @@ class TextileContainer(ABC, Textile):
     Интерфейс составных объектов текстиля 
     """
     @abstractmethod
-    def increase(self, side:Side, repeat:int=1):
+    def increase(self, side:Side, repeats:int=1):
         """
         Добавляется новый элемент с тем же _textile_type
         что и у контейнера.
         """
         raise NotImplementedError()
     @abstractmethod
-    def reduce(self, side:Side, repeat:int=1):
+    def reduce(self, side:Side, repeats:int=1):
         """Убавляются хранимые элементы. Не может опуститься ниже 1"""
         raise NotImplementedError()
     @property
@@ -79,7 +95,7 @@ class InstanceFactory:
         try:
             instance = self.cls_to_instantiate(*constructor_args)
         except TypeError as err:
-            raise KeyError(f"Не валидные аргументы: {constructor_args}," + 
+            raise TypeError(f"Не валидные аргументы: {constructor_args}," + 
                            f"для создания экземпляра класса {self.cls_to_instantiate.__name__}") from err
         self.__append_inst(constructor_args, instance)
         return instance
