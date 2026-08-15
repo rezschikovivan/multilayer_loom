@@ -56,12 +56,20 @@ class GridableView(BaseView):
 # Конкретные подклассы
 
 class WeftButton(BaseView):
+    """
+    # Визуал кнопок взаимодействия с сеткой
+    Описывает квадратную кнопку в рамках холста с командой на уменьшение или увеличение сетки утков
+    ### Конструктор: 
+    WeftButton( depicter:CanvasDepicter, x:float, y:float, cmnd_side:Side|str, is_increase:bool, command:Command )
+    ### Значение x, y аргуметов:
+    Задают положение левого верхнего угла кнопки 
+    """
     side_coeff = 0.03
-    def __init__(self, depicter, x, y, cmnd_side, is_increase:bool, command:Command):
-        self.x = x
-        self.y = y
+    btns_on_side = 3
+    def __init__(self, depicter, floor:int, is_on_left:bool, is_increase:bool, command:Command):
+        self.floor = floor
         self.is_increase = is_increase
-        self.cmnd_side = cmnd_side
+        self.is_on_left = is_on_left
         self.command = command
         super().__init__(depicter)
     
@@ -74,24 +82,29 @@ class WeftButton(BaseView):
         return round(min(wi_width, wi_height)*cls.side_coeff)
     
     def draw(self):
-        x0 = round(self.x)
-        y0 = round(self.y)
-        x1 = self.x+self.side_size
-        y1 = self.y+self.side_size
+        y_step = self.depicter.height / (self.btns_on_side+1)
+        x0 = self.side_size if not self.is_on_left else self.depicter.width - (self.side_size*2)
+        y0 = y_step*self.floor + (self.side_size if not self.is_increase else 0)
+        x1 = x0*2 if not self.is_on_left else self.depicter.width-self.side_size
+        y1 = y_step*self.floor + (0 if not self.is_increase else -self.side_size)
         sign = "+" if self.is_increase else "−"
         o_id = self.cnvs.create_rectangle(x0, y0, x1, y1, fill="#C5C5C5", outline="#000000", activefill="#AFAFAF")
-        self.cnvs.create_text(x0+(round(x1-x0))/2, y0+(round(y1-y0))/2, text=sign, state=DISABLED,font=Font(size=int(self.side_size)))
+        t_id = self.cnvs.create_text(max(x0, x1)-(max(x0, x1)-min(x0, x1))/2, max(y0, y1)-(max(y0, y1)-min(y0, y1))/2,
+                              text=sign, state=DISABLED, font=Font(size=int(self.side_size)))
+        self.cnvs.tag_raise(o_id)
+        self.cnvs.tag_raise(t_id)
         return o_id
 
     def on_click_right(self, event):
         pass
 
     def on_click_left(self, event):
-        self.command.execute()
+        if self.depicter.can_be_redrawed:
+            self.command.execute()
 
 class WeftView(GridableView):
     """Визуал описывающий уток"""
-    radius_coeff = 0.04
+    radius_coeff = 0.06
     def __init__(self, depicter:CanvasDepicter, column, row):
         super().__init__(depicter, column, row)
 
@@ -134,6 +147,7 @@ class WarpView(GridableView):
         y1 = self.y_step+(0.5*self.depicter.y_intervale)
         o_id = self.cnvs.create_line(x0, y0, x1, y1, fill=self.color, width=self.depicter.y_intervale*self.thickness_coefficient)
         self.cnvs.create_text((x0+x1)*0.5, (y0+y1)*0.5, text=f"index: {self.level}", fill="#FF0000")
+        self.cnvs.tag_lower(o_id)
         return o_id
 
     def change_color(self):

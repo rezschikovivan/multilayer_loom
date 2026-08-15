@@ -88,8 +88,8 @@ class CommandManager(metaclass=Singleton):
     """Manager each allows methods to manage the commands"""
 
     def __init__(self):
-        self.past_commands = BottomlessStack(30)
-        self.future_commands = BottomlessStack(30)
+        self.past_commands = BottomlessStack(50)
+        self.future_commands = BottomlessStack(50)
 
     def undo(self, event: Event):
         """Unexecute last command CTRL+Z"""

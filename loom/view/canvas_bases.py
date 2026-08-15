@@ -55,7 +55,7 @@ class ResizableCanvas(Redrawer):
     
     def __on_resizing(self, event:Event):
         """Срабатывает при изменении размеров окна, планирует в цикле событий перерисовк окна"""
-        if event.widget is self.main_root and self.can_be_redrawed:
+        if event.widget is self.main_root:
             if getattr(self, "_after_id", None):
                 self.main_root.after_cancel(self._after_id)
             self._after_id = self.main_root.after(self.redraw_duration_ms, self.__redraw)
@@ -78,6 +78,7 @@ class CanvasDepicter(ResizableCanvas):
         self.radius = 0
         self.rows:int = rows
         self.columns:int = columns
+        self.draw_delay_ms = 10
 
     @property
     def height(self):
@@ -86,6 +87,20 @@ class CanvasDepicter(ResizableCanvas):
     def width(self):
         return self.canvas.winfo_width()
 
+    def plan_to_draw_profile(self, *args):
+        """
+        Планирует перерисовать профиль, если поступает еще запрос обновляет таймер.
+        Блокирует возможность к сверхбыстрому перерисовыванию (например через зажатые клавиши),
+        чтобы предотвратить визуальные баги.
+        """
+        if self.can_be_redrawed:
+            if getattr(self, "_after_id", None):
+                self.main_root.after_cancel(self._after_id)
+            self._after_id = self.main_root.after(self.draw_delay_ms, self.draw_profile)
+
+    @abstractmethod
+    def draw_profile(self):
+        raise NotImplementedError()
     @abstractmethod
     def set_selected_warp(self, warp_view):
         raise NotImplementedError()
