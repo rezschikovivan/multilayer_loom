@@ -1,4 +1,4 @@
-from loom.model.memo import Memento, Originator
+from loom.controller.memo import Memento, Originator
 from loom.model.model_bases import Observer, Side, Textile, TextileContainer, TextileType
 from loom.model.weft import WeftsGrid
 

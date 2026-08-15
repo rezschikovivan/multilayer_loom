@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from loom.model.memo import Memento, Originator
+from loom.controller.memo import Memento, Originator
 from loom.model.model_bases import InstanceFactory, Side, Subject, Textile, TextileContainer, TextileType
 
 

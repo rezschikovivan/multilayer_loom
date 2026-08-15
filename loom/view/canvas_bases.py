@@ -55,7 +55,7 @@ class ResizableCanvas(Redrawer):
     
     def __on_resizing(self, event:Event):
         """Срабатывает при изменении размеров окна, планирует в цикле событий перерисовк окна"""
-        if event.widget is self.main_root and self.can_be_redrawed:
+        if event.widget is self.main_root:
             if getattr(self, "_after_id", None):
                 self.main_root.after_cancel(self._after_id)
             self._after_id = self.main_root.after(self.redraw_duration_ms, self.__redraw)
@@ -68,7 +68,7 @@ class CanvasDepicter(ResizableCanvas):
         if columns <= 0 or rows <= 0:
             raise ValueError(f"Количество колонок:строчек должно быть больше нуля, сейчас {columns}:{rows}")
         super().__init__(root)
-        self.canvas = Canvas(root, bg="#FFFFFF")
+        self.canvas = Canvas(root, bg="white", borderwidth=0, highlightthickness=0)
         self.canvas.pack(anchor='center', expand=True, fill='both')
         self.canvas.update()
 
@@ -78,7 +78,29 @@ class CanvasDepicter(ResizableCanvas):
         self.radius = 0
         self.rows:int = rows
         self.columns:int = columns
+        self.draw_delay_ms = 10
 
+    @property
+    def height(self):
+        return self.canvas.winfo_height()
+    @property
+    def width(self):
+        return self.canvas.winfo_width()
+
+    def plan_to_draw_profile(self, *args):
+        """
+        Планирует перерисовать профиль, если поступает еще запрос обновляет таймер.
+        Блокирует возможность к сверхбыстрому перерисовыванию (например через зажатые клавиши),
+        чтобы предотвратить визуальные баги.
+        """
+        if self.can_be_redrawed:
+            if getattr(self, "_after_id", None):
+                self.main_root.after_cancel(self._after_id)
+            self._after_id = self.main_root.after(self.draw_delay_ms, self.draw_profile)
+
+    @abstractmethod
+    def draw_profile(self):
+        raise NotImplementedError()
     @abstractmethod
     def set_selected_warp(self, warp_view):
         raise NotImplementedError()

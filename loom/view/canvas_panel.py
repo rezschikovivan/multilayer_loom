@@ -1,30 +1,22 @@
 from tkinter import Tk
 from math import sqrt
-from loom.controller import CommandManager, IncreaseWeftsCommand, ReduceWeftsCommand
+from loom.controller import IncreaseWeftsCommand, ReduceWeftsCommand
 from loom.model import FabricProfile, Observer, Side, WeftsGrid
 from loom.view.canvas_bases import CanvasDepicter, RainbowColorsGen
 from loom.view.shapes import BottomClickArea, ClickArea, TopClickArea, WarpView, WeftButton, WeftView
 
 
 class CanvasPanel(CanvasDepicter, Observer):
-    def __init__(self, root:Tk, profile:FabricProfile, manager:CommandManager):
+    def __init__(self, root:Tk, profile:FabricProfile):
         self.profile = profile
-        self.manager = manager
         self.profile.register_grid_listener(self)
         super().__init__(root, profile.grid_width, profile.grid_height)
         self.draw_profile()
 
-    @property
-    def height(self):
-        return self.canvas.winfo_height()
-    @property
-    def width(self):
-        return self.canvas.winfo_width()
-
     def notify(self, grid:WeftsGrid, side):
         self.columns = grid.row_width
         self.rows = grid.column_height
-        self.draw_profile()
+        self.plan_to_draw_profile()
 
     def set_selected_warp(self, warp_view:"WarpView"):
         """Устанавливает основу как выбранную"""
@@ -49,15 +41,17 @@ class CanvasPanel(CanvasDepicter, Observer):
         """Расчитывает размеры для текущего окна"""
         self.x_intervale = self.width / (self.columns+1)
         self.y_intervale = self.height / (self.rows+1)
-        self.radius = 0.01*WeftView.radius_coeff * sqrt((self.y_intervale**2) * (self.x_intervale**2))/2
+        self.radius = WeftView.radius_coeff * sqrt((self.y_intervale*2) * (self.x_intervale))
 
     def draw_profile(self):
         """Рисует профиль создавая объекты соответствующие модели"""
+        self.can_be_redrawed = False
         self.del_all_redrawable()
         self.canvas.delete("all")
         self.calculate_size_values()
         rainbow = RainbowColorsGen()
 
+        self.draw_buttons()
         self.__create_warp_view(0, 0, rainbow.next_color())# распологаем самую верхнюю линию основы (нулевую)
         for r in range(1, self.rows+1):
             self.y_step = r*self.y_intervale
@@ -67,28 +61,16 @@ class CanvasPanel(CanvasDepicter, Observer):
                 # распологаем зоны нажатия и утки
                 self.__create_weft_view( c, r)
                 self.__create_click_area(c, r)
-        self.__make_buttons_kit(self.x_intervale*0.5, self.y_intervale*0.25, Side.top)
+        self.can_be_redrawed = True
 
     def draw_buttons(self):
-        # РАЗМЕЩАТЬ КНОПКИ ПО УГЛАМ ЦИКЛОМ
-        for i in range(1, self.columns+1, self.columns-1):# вверху сетки ->- внизу сетки
-            x = self.x_intervale*i*0.5
-            y = self.y_intervale*i*0.25
-            self.__make_buttons_kit(x,y)
-        
-    def __make_buttons_kit(self, x, y, cmnd_side:Side):
-        """Принимает координаты правой нижней точки кнопок"""
-        btn_side = min(self.x_intervale, self.y_intervale)*WeftButton.side_coeff
-        self.__draw_button(x-btn_side, y-btn_side, cmnd_side, True)
-        self.__draw_button(x-btn_side, y-(2*btn_side), cmnd_side, False)
+        """Создаёт кнопки слева и справа"""
 
-    def __draw_button(self, x, y, cmnd_side:Side, is_increase:bool):
-        """Создает одну кнопку"""
-        if is_increase:
-            action = IncreaseWeftsCommand(self.profile, cmnd_side, self.manager)
-        else:
-            action = ReduceWeftsCommand(self.profile, cmnd_side, self.manager)
-        WeftButton(self, x,y, cmnd_side, is_increase, action)
+        for i, side in enumerate((Side.top, Side.left, Side.bottom), 1):
+            self.__make_buttons_kit(i, True, side)
+
+        for i, side in enumerate((Side.top, Side.right, Side.bottom), 1):
+            self.__make_buttons_kit(i, False, side)
         
     def get_canvas(self):
         return self.canvas
@@ -119,5 +101,15 @@ class CanvasPanel(CanvasDepicter, Observer):
         else:
             ClickArea(self, column, row)
 
+    def __make_buttons_kit(self, floor:int, is_on_left:bool, cmnd_side:Side):
+        """Принимает координаты левой верхней точки набора кнопок и строну для взаимодействия"""
+        self.__create_button(floor, is_on_left, cmnd_side, True)
+        self.__create_button(floor, is_on_left, cmnd_side, False)
 
-
+    def __create_button(self, floor:int, is_on_left:bool, cmnd_side:Side, is_increase:bool):
+        """Создает одну кнопку"""
+        if is_increase:
+            action = IncreaseWeftsCommand(self.profile, cmnd_side)
+        else:
+            action = ReduceWeftsCommand(self.profile, cmnd_side)
+        WeftButton(self, floor, is_on_left, is_increase, action)
