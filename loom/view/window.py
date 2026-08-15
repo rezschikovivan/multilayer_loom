@@ -2,7 +2,7 @@ from platform import system
 from tkinter import PhotoImage, Tk
 
 from loom.controller.command import CommandManager
-from loom.model.model import FabricProfile
+from loom.model import FabricProfile
 from loom.view.canvas_panel import CanvasPanel
 from loom.view.tab_menu import TabMenu
 

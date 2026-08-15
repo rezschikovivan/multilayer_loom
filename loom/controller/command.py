@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from tkinter import Event
 
-from loom.model.memo import Memento, Originator
+from loom.controller.memo import Memento, Originator
 
 
 class Command(ABC):

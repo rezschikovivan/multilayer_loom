@@ -1,5 +1,5 @@
 from loom.controller import Command, CommandManager
-from loom.model.model import FabricProfile, Side
+from loom.model.front import FabricProfile, Side
 from loom_logger import get_logger
 
 # Команы Сетки утков
