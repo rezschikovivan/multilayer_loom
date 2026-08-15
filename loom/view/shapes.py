@@ -56,7 +56,7 @@ class GridableView(BaseView):
 # Конкретные подклассы
 
 class WeftButton(BaseView):
-    side_coeff = 0.05
+    side_coeff = 0.03
     def __init__(self, depicter, x, y, cmnd_side, is_increase:bool, command:Command):
         self.x = x
         self.y = y
@@ -67,11 +67,11 @@ class WeftButton(BaseView):
     
     @property
     def side_size(self)->float:
-        return self.get_side_size(self.depicter.x_intervale, self.depicter.y_intervale)
+        return self.get_side_size(self.depicter.width, self.depicter.height)
     
     @classmethod
-    def get_side_size(cls, x_intervale:float, y_intervale:float):
-        return round(min(x_intervale, y_intervale)*cls.side_coeff)
+    def get_side_size(cls, wi_width:float, wi_height:float):
+        return round(min(wi_width, wi_height)*cls.side_coeff)
     
     def draw(self):
         x0 = round(self.x)
@@ -166,6 +166,8 @@ class WarpView(GridableView):
     def _untint(self):
         """Устанавливает цвет на страндартный"""
         self.cnvs.itemconfigure(self.id, fill=self.color)
+
+# Зоны нажатия
 
 class ClickArea(GridableView):
     """Визуал описывающий зону для нажатия"""

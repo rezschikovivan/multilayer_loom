@@ -1,25 +1,17 @@
 from tkinter import Tk
 from math import sqrt
-from loom.controller import CommandManager, IncreaseWeftsCommand, ReduceWeftsCommand
+from loom.controller import IncreaseWeftsCommand, ReduceWeftsCommand
 from loom.model import FabricProfile, Observer, Side, WeftsGrid
 from loom.view.canvas_bases import CanvasDepicter, RainbowColorsGen
 from loom.view.shapes import BottomClickArea, ClickArea, TopClickArea, WarpView, WeftButton, WeftView
 
 
 class CanvasPanel(CanvasDepicter, Observer):
-    def __init__(self, root:Tk, profile:FabricProfile, manager:CommandManager):
+    def __init__(self, root:Tk, profile:FabricProfile):
         self.profile = profile
-        self.manager = manager
         self.profile.register_grid_listener(self)
         super().__init__(root, profile.grid_width, profile.grid_height)
         self.draw_profile()
-
-    @property
-    def height(self):
-        return self.canvas.winfo_height()
-    @property
-    def width(self):
-        return self.canvas.winfo_width()
 
     def notify(self, grid:WeftsGrid, side):
         self.columns = grid.row_width
@@ -78,16 +70,16 @@ class CanvasPanel(CanvasDepicter, Observer):
         
     def __make_buttons_kit(self, x, y, cmnd_side:Side):
         """Принимает координаты правой нижней точки кнопок"""
-        btn_side = min(self.x_intervale, self.y_intervale)*WeftButton.side_coeff
+        btn_side = WeftButton.get_side_size(self.width, self.height)
         self.__draw_button(x-btn_side, y-btn_side, cmnd_side, True)
         self.__draw_button(x-btn_side, y-(2*btn_side), cmnd_side, False)
 
     def __draw_button(self, x, y, cmnd_side:Side, is_increase:bool):
         """Создает одну кнопку"""
         if is_increase:
-            action = IncreaseWeftsCommand(self.profile, cmnd_side, self.manager)
+            action = IncreaseWeftsCommand(self.profile, cmnd_side)
         else:
-            action = ReduceWeftsCommand(self.profile, cmnd_side, self.manager)
+            action = ReduceWeftsCommand(self.profile, cmnd_side)
         WeftButton(self, x,y, cmnd_side, is_increase, action)
         
     def get_canvas(self):

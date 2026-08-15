@@ -7,8 +7,8 @@ from loom.controller.memo import Memento, Originator
 class Command(ABC):
     """Abstract interface of "command" pattern"""
 
-    def __init__(self, manager: "CommandManager", originator:Originator, *memento_args):
-        self.manager = manager
+    def __init__(self, originator:Originator, *memento_args):
+        self.manager = CommandManager()
         self._originator = originator
         self.memento_args = memento_args
         self.last_memento: Memento = None
@@ -77,8 +77,14 @@ class BottomlessStack:
     def clear(self):
         self.enum.clear()
 
+class Singleton(type):
+    _instances = {}
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super().__call__(*args, **kwargs)
+        return cls._instances[cls]
 
-class CommandManager:
+class CommandManager(metaclass=Singleton):
     """Manager each allows methods to manage the commands"""
 
     def __init__(self):

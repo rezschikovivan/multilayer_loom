@@ -68,7 +68,7 @@ class CanvasDepicter(ResizableCanvas):
         if columns <= 0 or rows <= 0:
             raise ValueError(f"Количество колонок:строчек должно быть больше нуля, сейчас {columns}:{rows}")
         super().__init__(root)
-        self.canvas = Canvas(root, bg="#FFFFFF")
+        self.canvas = Canvas(root, bg="white", borderwidth=0, highlightthickness=0)
         self.canvas.pack(anchor='center', expand=True, fill='both')
         self.canvas.update()
 
@@ -78,6 +78,13 @@ class CanvasDepicter(ResizableCanvas):
         self.radius = 0
         self.rows:int = rows
         self.columns:int = columns
+
+    @property
+    def height(self):
+        return self.canvas.winfo_height()
+    @property
+    def width(self):
+        return self.canvas.winfo_width()
 
     @abstractmethod
     def set_selected_warp(self, warp_view):

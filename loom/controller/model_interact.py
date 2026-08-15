@@ -1,4 +1,4 @@
-from loom.controller import Command, CommandManager
+from loom.controller import Command
 from loom.model.front import FabricProfile, Side
 from loom_logger import get_logger
 
@@ -6,8 +6,8 @@ from loom_logger import get_logger
 
 class WeftGridSizeCommand(Command):
     """Базовый класс для управления сеткой утков"""
-    def __init__(self, profile:FabricProfile, side:Side, manager:CommandManager, repeat:int=1):
-        super().__init__(manager, profile.grid, side)
+    def __init__(self, profile:FabricProfile, side:Side, repeat:int=1):
+        super().__init__(profile.grid, side)
         self.profile = profile
         self.side = side
         self.repeat = repeat
@@ -33,7 +33,7 @@ class ReduceWeftsCommand(WeftGridSizeCommand):
 
 class SetWarpAnchorCommand(Command):
     """Команда устновки якоря основы"""
-    def __init__(self, profile:FabricProfile, warp_index:int, column:int, target_row:int, manager:CommandManager):
+    def __init__(self, profile:FabricProfile, warp_index:int, column:int, target_row:int):
         if column > profile.grid_width:
             raise ValueError(f"Длинна колонок основы меньше переданной колонки: {column}, длинна основы: {profile.grid_width}")
         if target_row > profile.lines_count:
@@ -42,7 +42,7 @@ class SetWarpAnchorCommand(Command):
                 f"т.к. превышает количество строк: {target_row} > {profile.lines_count}"
                    )
         warp = profile.get_warp(warp_index)
-        super().__init__(manager, warp)
+        super().__init__(warp)
         self.profile = profile
         self.warp_index = warp_index
         self.column = column
@@ -59,8 +59,8 @@ class SetWarpAnchorCommand(Command):
 
 class ToggleWeftCommand(Command):
     """Класс устаноки состояния утка"""
-    def __init__(self, profile:FabricProfile, column, row, manager):
-        super().__init__(manager, profile.grid, "right")# т.к. размеры не меняються можно указать любую сторону
+    def __init__(self, profile:FabricProfile, column, row):
+        super().__init__(profile.grid, "right")# т.к. размеры не меняються можно указать любую сторону
         self.profile = profile
         self.column = column
         self.row = row
