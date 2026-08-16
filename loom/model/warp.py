@@ -23,6 +23,9 @@ class Warp(Textile, Originator):
     def __getitem__(self, key)->int:
         return self.anchor_points[key]
 
+    def __iter__(self):
+        return iter(self.anchor_points)
+
     def get_point(self, warp_index:int, column)->list[int,int]:
         return [column, warp_index + self.anchor_points[column]]
 
@@ -144,7 +147,10 @@ class WarpLines(TextileContainer, Observer):
         self.update_warps(grid, side)
 
     def __getitem__(self, key)->Warp:
-        return self._warps[key]
+        return self.get_warp(key)
+
+    def __len__(self):
+        return len(self._warps)
 
     def update_warps(self, grid:WeftsGrid, side:Side):
         """Обновляет все хранимые основы и гарантирует, что обновлены будут все экземпляры"""
@@ -158,7 +164,10 @@ class WarpLines(TextileContainer, Observer):
             self._warps[i].update(i, grid, side)
     
     def get_warp(self, line_index):
-        return self._warps[line_index]
+        if line_index <= len(self)-1: 
+            return self._warps[line_index]
+        else:
+            raise IndexError(f"Невозможно получить основу под индексом {line_index}, всего существует лишь {len(self)} основ!")
     
     def _set_textile_type(self, new_textile):
         if self.textile_type is not new_textile:

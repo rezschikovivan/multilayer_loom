@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from tkinter import DISABLED, Event
 from tkinter.font import Font
-
+#from math import 
 from loom.controller import Command
 from loom.view.canvas_bases import CanvasDepicter, Redrawable
 
@@ -109,10 +109,10 @@ class WeftView(GridableView):
         super().__init__(depicter, column, row)
 
     def on_click_left(self, event):
-        self.depicter.set_weft(self.column, self.row)
+        self.depicter.left_click_weft(self.column, self.row)
 
     def on_click_right(self, event):
-        self.depicter.get_weft(self.column, self.row)
+        self.depicter.right_click_weft(self.column, self.row)
 
     def draw(self):
         x0 = self.x_step-self.depicter.radius
@@ -120,7 +120,7 @@ class WeftView(GridableView):
         x1 = self.x_step+self.depicter.radius
         y1 = self.y_step+self.depicter.radius
         o_id = self.cnvs.create_oval(x0, y0, x1, y1, outline="#000000", fill="#FFFFFF", width=1.5)
-        self.cnvs.create_text((x0+x1)*0.5, (y0+y1)*0.5, text=f"{self.column-1}:{self.depicter.rows-self.row}")
+        self.cnvs.create_text((x0+x1)*0.5, (y0+y1)*0.5, text=f"{self.column-1}:{self.depicter.rows-self.row}",state=DISABLED)
         return o_id
 
 class WarpView(GridableView):
@@ -133,19 +133,23 @@ class WarpView(GridableView):
         self.tint_color:str = ""
         self.is_tinted: bool = False
         super().__init__(depicter, column, row)
+        
+    @property
+    def tag(self):
+        return f"warp{self.level}"
 
     def on_click_left(self, event):
-        self.depicter.set_selected_warp(self)
+        self.depicter.select_warp(self)
         
     def on_click_right(self, event):
-        self.depicter.get_warp(self.level)
+        self.depicter.right_click_warp(self.level)
 
     def draw(self):
         x0 = 0
         y0 = self.y_step+(0.5*self.depicter.y_intervale)
         x1 = self.depicter.canvas.winfo_width()
         y1 = self.y_step+(0.5*self.depicter.y_intervale)
-        o_id = self.cnvs.create_line(x0, y0, x1, y1, fill=self.color, width=self.depicter.y_intervale*self.thickness_coefficient)
+        o_id = self.cnvs.create_line(x0, y0, x1, y1, fill=self.color, width=self.depicter.y_intervale*self.thickness_coefficient, tags=(self.tag,))
         self.cnvs.create_text((x0+x1)*0.5, (y0+y1)*0.5, text=f"index: {self.level}", fill="#FF0000")
         self.cnvs.tag_lower(o_id)
         return o_id
@@ -199,7 +203,7 @@ class ClickArea(GridableView):
         pass
 
     def on_click_left(self, event:Event):
-        self.depicter.set_warp(self.column, self.row)
+        self.depicter.left_click_warp(self.column, self.depicter.rows-self.row)
 
 class BottomClickArea(ClickArea):
     """Визуал описывающий нижнею зону для нажатий"""
@@ -224,3 +228,5 @@ class TopClickArea(ClickArea):
         self.cnvs.create_text((x0+x1)*0.5, (y0+y1)*0.5, text=f"c{self.column-1}:r{self.depicter.rows}")
         self.cnvs.tag_lower(o_id)
         return o_id
+    def on_click_left(self, event:Event):
+        self.depicter.left_click_warp(self.column, self.depicter.rows-self.row+1)

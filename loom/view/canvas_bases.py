@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from collections.abc import Generator
 from tkinter import Canvas, Event, Tk
+from loom.model.warp import Warp
 
 
 class Redrawable(ABC):
@@ -102,23 +103,29 @@ class CanvasDepicter(ResizableCanvas):
     def draw_profile(self):
         raise NotImplementedError()
     @abstractmethod
-    def set_selected_warp(self, warp_view):
+    def draw_profile(self):
+        raise NotImplementedError()
+    @abstractmethod
+    def select_warp(self, warp_view):
         raise NotImplementedError()
     @abstractmethod
     def get_canvas(self)->Canvas:
         raise NotImplementedError()
     @abstractmethod
-    def set_warp(self, column, row):
+    def left_click_warp(self, column, row):
         raise NotImplementedError()
     @abstractmethod
-    def get_warp(self, warp_index:int):
+    def right_click_warp(self, warp_index:int):
         raise NotImplementedError()
     @abstractmethod
-    def set_weft(self, column, row):
+    def left_click_weft(self, column, row):
         raise NotImplementedError()
     @abstractmethod
-    def get_weft(self, column, row):
+    def right_click_weft(self, column, row):
         raise NotImplementedError()    
+    @abstractmethod
+    def get_warp(self, warp_index:int)->Warp:
+        raise NotImplementedError()
 
 class RainbowColorsGen:
     """Генератор возвращающий цвета ррадуги по очереди"""

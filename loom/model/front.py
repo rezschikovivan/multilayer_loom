@@ -33,7 +33,10 @@ class FabricProfile(TextileContainer):
         self.lines.set_warp_anchor(line_index, column, target_line)
 
     def get_warp(self, index:int):
-        return self.lines[index]
+        if index <= len(self.lines)-1: 
+            return self.lines[index]
+        else:
+            raise IndexError(f"Невозможно получить основу под индексом {index}, всего существует лишь {len(self.lines)} основ!")
 
     def get_weft(self, column:int, row:int):
         return self.grid.get_weft(column, row)
