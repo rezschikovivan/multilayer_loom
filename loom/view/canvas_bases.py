@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from collections.abc import Generator
 from tkinter import Canvas, Event, Tk
+
 from loom.model.warp import Warp
 
 
@@ -99,9 +100,6 @@ class CanvasDepicter(ResizableCanvas):
                 self.main_root.after_cancel(self._after_id)
             self._after_id = self.main_root.after(self.draw_delay_ms, self.draw_profile)
 
-    @abstractmethod
-    def draw_profile(self):
-        raise NotImplementedError()
     @abstractmethod
     def draw_profile(self):
         raise NotImplementedError()
