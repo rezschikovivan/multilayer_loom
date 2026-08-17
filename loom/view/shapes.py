@@ -84,9 +84,9 @@ class WeftButton(BaseView):
     
     def draw(self):
         y_step = self.depicter.height / (self.btns_on_side+1)
-        x0 = self.side_size if not self.is_on_left else self.depicter.width - (self.side_size*2)
+        x0 = self.side_size if  self.is_on_left else (self.depicter.width - (self.side_size*2))
         y0 = y_step*self.floor + (self.side_size if not self.is_increase else 0)
-        x1 = x0*2 if not self.is_on_left else self.depicter.width-self.side_size
+        x1 = x0*2 if  self.is_on_left else self.depicter.width-self.side_size
         y1 = y_step*self.floor + (0 if not self.is_increase else -self.side_size)
         sign = "+" if self.is_increase else "−"
         o_id = self.cnvs.create_rectangle(x0, y0, x1, y1, fill="#C5C5C5", outline="#000000", activefill="#AFAFAF")
@@ -150,7 +150,8 @@ class WarpView(GridableView):
         y0 = self.y_step+(0.5*self.depicter.y_intervale)
         x1 = self.depicter.canvas.winfo_width()
         y1 = self.y_step+(0.5*self.depicter.y_intervale)
-        o_id = self.cnvs.create_line(x0, y0, x1, y1, fill=self.color, width=self.depicter.y_intervale*self.thickness_coefficient, tags=(self.tag,))
+        color = self.color if not self.is_tinted else self.tint_color or self._tint()
+        o_id = self.cnvs.create_line(x0, y0, x1, y1, fill=color, width=self.depicter.y_intervale*self.thickness_coefficient, tags=(self.tag,))
         self.cnvs.create_text((x0+x1)*0.5, (y0+y1)*0.5, text=f"index: {self.level}", fill="#FF0000")
         self.cnvs.tag_lower(o_id)
         return o_id
@@ -181,6 +182,7 @@ class WarpView(GridableView):
 
             self.tint_color = f"#{r:02x}{g:02x}{b:02x}"
         self.cnvs.itemconfigure(self.id, fill=self.tint_color)
+        return self.tint_color
 
     def _untint(self):
         """Устанавливает цвет на страндартный"""

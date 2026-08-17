@@ -11,14 +11,13 @@ from loom.view.shapes import BottomClickArea, ClickArea, TopClickArea, WarpView,
 class CanvasPanel(CanvasDepicter, Observer):
     def __init__(self, root:Tk, profile:FabricProfile):
         self.profile = profile
-        self.profile.register_grid_listener(self)
+        self.profile.register_observer(self)
         super().__init__(root, profile.grid_width, profile.grid_height)
         self.draw_profile()
 
-    def notify(self, grid:WeftsGrid, side):
-        self.columns = grid.row_width
-        self.rows = grid.column_height
-        self.unselect_warp()
+    def notify(self, profile:FabricProfile, *args):
+        self.columns = profile.grid_width
+        self.rows = profile.grid_height
         self.plan_to_draw_profile()
 
     def select_warp(self, warp_view:"WarpView"):

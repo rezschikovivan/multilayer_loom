@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 from loom.controller.memo import Memento, Originator
-from loom.model.model_bases import InstanceFactory, Side, Subject, Textile, TextileContainer, TextileType
+from loom.model.model_bases import InstanceFactory, Side, WeftGridSubject, Textile, TextileContainer, TextileType, notifying
 
 
 class Weft(Textile):
@@ -23,7 +23,7 @@ class Weft(Textile):
         return self.__str__()
 
 
-class WeftsGrid(TextileContainer, Subject, Originator):
+class WeftsGrid(TextileContainer, WeftGridSubject, Originator):
     """
     Составной объект описывабщий сетку утков.
     Реализует интерфейс для управления сеткой.
@@ -37,7 +37,7 @@ class WeftsGrid(TextileContainer, Subject, Originator):
         self._weft_factory = InstanceFactory(Weft)
         self.minsize = min_size
         TextileContainer.__init__(self, textile_type)
-        Subject.__init__(self)
+        WeftGridSubject.__init__(self)
         for _ in range(columns): # задает начальную сетку
              self._wefts.append([self._weft_factory.get_instance(True, self._textile_type) for _ in range(rows)])
 
@@ -91,16 +91,18 @@ class WeftsGrid(TextileContainer, Subject, Originator):
     def get_weft(self, column_index:int, row_index:int):
         return self._wefts[column_index][-(row_index+1)]
 
-    def _set_weft(self, column_index:int, row_index:int, value:Weft):
-        self._wefts[column_index][-(row_index+1)] = value
-
+    def _set_weft(self, column_index:int, row_index:int, weft:Weft):
+        self._wefts[column_index][-(row_index+1)] = weft
+    @notifying
     def increase(self, side:Side|str, repeat:int=1):
         side = Side(side)
         if side in (Side.left, Side.right):
             self.__increment_column(side, repeat)
         elif side in (Side.top, Side.bottom):
             self.__increment_row(side, repeat)
+        return side
 
+    @notifying
     def reduce(self, side:Side|str, repeat:int=1):
         side = Side(side)
         if not self.can_be_reduced(side, repeat):
@@ -111,6 +113,7 @@ class WeftsGrid(TextileContainer, Subject, Originator):
             self.__decrement_column(side, repeat)
         elif side in (Side.top, Side.bottom):
             self.__decrement_row(side, repeat)
+        return side
 
     def can_be_reduced(self, side:Side|str, repeat:int = 1)->bool:
         side = Side(side)
@@ -130,7 +133,6 @@ class WeftsGrid(TextileContainer, Subject, Originator):
                 self._wefts.append(new_column)
             elif side == Side.left:
                 self._wefts.insert(0, new_column)
-        self.notify_observers(self, side)
 
     def __decrement_column(self, side:"Side", repeat:int):
         """Убирает новую колонку утков по указанной стороне"""
@@ -141,7 +143,6 @@ class WeftsGrid(TextileContainer, Subject, Originator):
                 self._wefts.pop()
             elif side == Side.left:
                 self._wefts.pop(0)
-        self.notify_observers(self, side)
 
     def __increment_row(self, side:"Side", repeat:int):
         """Добавляет строчку утков по указанной стороне"""
@@ -154,7 +155,6 @@ class WeftsGrid(TextileContainer, Subject, Originator):
             elif side == Side.bottom:
                 for column in self._wefts:
                     column.append(self._weft_factory.get_instance(True, self._textile_type))
-        self.notify_observers(self, side)
 
     def __decrement_row(self, side:"Side", repeat:int):
         """Убирает строчку утков по указанной стороне"""
@@ -167,11 +167,10 @@ class WeftsGrid(TextileContainer, Subject, Originator):
             elif side == Side.bottom:
                 for column in self._wefts:
                     column.pop()
-        self.notify_observers(self, side)
-
+    @notifying
     def set_memento(self, memento: Memento):
         self._wefts, side = memento.get_state(self)
-        self.notify_observers(self, side)
+        return side
 
     def create_memento(self, side:Side)->Memento:
         return Memento(self, [deepcopy(self._wefts), Side(side)])

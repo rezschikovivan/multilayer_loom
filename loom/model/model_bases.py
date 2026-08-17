@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import StrEnum
-from typing import Any, TypeVar
+from typing import Any, TypeVar, Iterable
 
 
 class MultiStrEnum(StrEnum):
@@ -20,21 +20,37 @@ Side = MultiStrEnum("Side", ("right","left", "top", "bottom"))
 
 class Observer(ABC):
     @abstractmethod
-    def notify(self, grid, side:Side):
+    def notify(self, subject, *args):
         pass
 
 class Subject:
     def __init__(self):
         self.observers: list[Observer] = []
+
     def register_observer(self, o: Observer):
         self.observers.append(o)
 
     def remove_observer(self, o: Observer):
         self.observers.remove(o)
         
-    def notify_observers(self, grid, side:Side):
+    def notify_observers(self, *args):
         for o in self.observers:
-            o.notify(grid, side)
+            o.notify(self, *args)
+
+class WeftGridSubject(Subject):
+    def notify_observers(self, *args):
+        for o in self.observers:
+            o.notify(self, *args)
+
+def notifying(func):
+    """Уведомляет наблюдателей с возвращаемым значением в качесте аргумента оповещения"""
+    def wrapper(self:Subject, *args, **kwargs):
+        f_args = func(self, *args, **kwargs)
+        if isinstance(f_args, Iterable) and not isinstance(f_args, str):
+            self.notify_observers(*f_args)    
+        else:
+            self.notify_observers(f_args)
+    return wrapper
 
 class TextileType:
     pass

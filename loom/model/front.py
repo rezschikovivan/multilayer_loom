@@ -1,14 +1,15 @@
-from loom.model.model_bases import InstanceFactory, Observer, TextileContainer, TextileType
+from loom.model.model_bases import InstanceFactory, Observer, TextileContainer, TextileType, Subject, notifying
 from loom.model.warp import WarpLines
 from loom.model.weft import Side, WeftsGrid
 
 
-class FabricProfile(TextileContainer): 
+class FabricProfile(TextileContainer, Subject): 
     def __init__(self, textile_type:TextileType):
         self.grid = WeftsGrid(textile_type)
         self.lines = WarpLines(textile_type, self.grid)
         self.textile_type_factory = InstanceFactory(TextileType)
-        super().__init__(textile_type)
+        super(TextileContainer, self).__init__(textile_type)
+        super(Subject, self).__init__()
     
     @property
     def grid_height(self):
@@ -22,13 +23,13 @@ class FabricProfile(TextileContainer):
 
     def register_grid_listener(self, listener:Observer):
         self.grid.register_observer(listener)
-
+    @notifying
     def reduce(self, side:Side, repeat=1):
         self.grid.reduce(side, repeat)
-    
+    @notifying
     def increase(self, side:Side, repeat=1):
         self.grid.increase(side, repeat)
-    
+    @notifying
     def set_anchor(self, line_index:int, column, target_line):
         self.lines.set_warp_anchor(line_index, column, target_line)
 
@@ -40,7 +41,7 @@ class FabricProfile(TextileContainer):
 
     def get_weft(self, column:int, row:int):
         return self.grid.get_weft(column, row)
-
+    @notifying
     def toggle_weft(self, column_index, row_index):
         weft = self.grid.get_weft(column_index, row_index)
         if weft.is_active:

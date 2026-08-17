@@ -123,7 +123,7 @@ class WarpLines(TextileContainer, Observer):
     основы на 1 больше чем высота утков.
     """
     def __init__(self, textile_type:TextileType, grid:WeftsGrid):
-        super().__init__(textile_type)
+        super(TextileContainer, self).__init__(textile_type) 
         self._warps:list[Warp] = []
         grid.register_observer(self)
         for _ in range(grid.column_height+1):
