@@ -42,7 +42,7 @@ class SetWarpAnchorCommand(Command):
                 f"т.к. превышает количество строк: {target_row} > {profile.lines_count}"
                    )
         warp = profile.get_warp(warp_index)
-        super().__init__(warp)
+        super().__init__(profile.lines)
         self.profile = profile
         self.warp_index = warp_index
         self.column = column

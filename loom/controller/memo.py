@@ -4,11 +4,11 @@ from abc import ABC, abstractmethod
 class Memento:
     def __init__(self, originator:"Originator", state):
         self.originator = originator
-        self.state = state
+        self.__state = state
         
     def get_state(self, requester:"Originator"):
         self.check_permission(requester)
-        return self.state
+        return self.__state
 
     def check_permission(self, requester:"Originator"):
         if requester is not self.originator:
