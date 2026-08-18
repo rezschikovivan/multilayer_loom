@@ -1,15 +1,16 @@
-from loom.model.model_bases import InstanceFactory, Observer, TextileContainer, TextileType, Subject, notifying
+from loom.model.model_bases import InstanceFactory, Observer, Subject, TextileContainer, TextileType, notifying
 from loom.model.warp import WarpLines
 from loom.model.weft import Side, WeftsGrid
 
 
-class FabricProfile(TextileContainer, Subject): 
+class FabricProfile(TextileContainer, Subject, Observer): 
     def __init__(self, textile_type:TextileType):
+        TextileContainer.__init__(self, textile_type)
+        Subject.__init__(self)
         self.grid = WeftsGrid(textile_type)
         self.lines = WarpLines(textile_type, self.grid)
         self.textile_type_factory = InstanceFactory(TextileType)
-        super(TextileContainer, self).__init__(textile_type)
-        super(Subject, self).__init__()
+        self.lines.register_observer(self)
     
     @property
     def grid_height(self):
@@ -21,12 +22,13 @@ class FabricProfile(TextileContainer, Subject):
     def lines_count(self):
         return self.lines.lines_count
 
-    def register_grid_listener(self, listener:Observer):
-        self.grid.register_observer(listener)
-    @notifying
+    def notify(self, subject, *args):
+        return self.notify_observers()
+
+
     def reduce(self, side:Side, repeat=1):
         self.grid.reduce(side, repeat)
-    @notifying
+
     def increase(self, side:Side, repeat=1):
         self.grid.increase(side, repeat)
     @notifying

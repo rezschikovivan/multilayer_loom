@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 from loom.controller.memo import Memento, Originator
-from loom.model.model_bases import InstanceFactory, Side, WeftGridSubject, Textile, TextileContainer, TextileType, notifying
+from loom.model.model_bases import InstanceFactory, Side, Textile, TextileContainer, TextileType, WeftGridSubject, notifying
 
 
 class Weft(Textile):
@@ -101,7 +101,6 @@ class WeftsGrid(TextileContainer, WeftGridSubject, Originator):
         elif side in (Side.top, Side.bottom):
             self.__increment_row(side, repeat)
         return side
-
     @notifying
     def reduce(self, side:Side|str, repeat:int=1):
         side = Side(side)

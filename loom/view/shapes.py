@@ -53,10 +53,15 @@ class GridableView(BaseView):
     @property
     def y_step(self)->float:
         return self.row*self.depicter.y_intervale
-    
+    @property
+    def model_row(self):
+        return self.depicter.rows - self.row
+    @property
+    def model_column(self):
+        return (self.column-1)
 # Конкретные подклассы
 
-class WeftButton(BaseView):
+class GridButton(BaseView):
     """
     # Визуал кнопок взаимодействия с сеткой
     Описывает квадратную кнопку в рамках холста с командой на уменьшение или увеличение сетки утков
@@ -110,10 +115,10 @@ class WeftView(GridableView):
         super().__init__(depicter, column, row)
 
     def on_click_left(self, event):
-        self.depicter.left_click_weft(self.column, self.row)
+        self.depicter.left_click_weft(self.model_column, self.model_row)
 
     def on_click_right(self, event):
-        self.depicter.right_click_weft(self.column, self.row)
+        self.depicter.right_click_weft(self.model_column, self.model_row)
 
     def draw(self):
         x0 = self.x_step-self.depicter.radius
@@ -121,7 +126,7 @@ class WeftView(GridableView):
         x1 = self.x_step+self.depicter.radius
         y1 = self.y_step+self.depicter.radius
         o_id = self.cnvs.create_oval(x0, y0, x1, y1, outline="#000000", fill="#FFFFFF", width=1.5)
-        self.cnvs.create_text((x0+x1)*0.5, (y0+y1)*0.5, text=f"{self.column-1}:{self.depicter.rows-self.row}",state=DISABLED)
+        #self.cnvs.create_text((x0+x1)*0.5, (y0+y1)*0.5, text=f"{self.model_column}:{self.model_row}",state=DISABLED)
         return o_id
 
 class WarpView(GridableView):
@@ -146,14 +151,32 @@ class WarpView(GridableView):
         self.depicter.right_click_warp(self.level)
 
     def draw(self):
-        x0 = 0
-        y0 = self.y_step+(0.5*self.depicter.y_intervale)
-        x1 = self.depicter.canvas.winfo_width()
-        y1 = self.y_step+(0.5*self.depicter.y_intervale)
+        self.draw_warp()
+        return self.tag
+
+    def draw_warp(self):
+        y_step = self.depicter.y_intervale* (self.row)
+        last_point = (0, 0)
+        next_point = (0, y_step+(0.5*self.depicter.y_intervale))
+        for i, rel_anchor in enumerate(self.depicter.get_warp(self.level), 1):
+            last_point = next_point
+            next_point = (self.depicter.x_intervale*i, self.anchor_to_y(rel_anchor))
+            self.create_line(*last_point, *next_point)
+        last_point = next_point
+        next_point = (self.depicter.canvas.winfo_width(), y_step+(0.5*self.depicter.y_intervale))
+        self.create_line(*last_point, *next_point)
+
+    def anchor_to_y(self, anchor:int)->float:
+        if anchor < 0:
+            return self.depicter.y_intervale*(abs(anchor)+self.row)+(0.5*self.depicter.y_intervale)
+        elif anchor == 0:
+            return (self.depicter.y_intervale*self.row) + (0.5*self.depicter.y_intervale)
+        elif anchor > 0:
+            return self.depicter.height - self.depicter.y_intervale*(self.level+anchor) - (0.5*self.depicter.y_intervale) 
+
+    def create_line(self, x0, y0, x1, y1):
         color = self.color if not self.is_tinted else self.tint_color or self._tint()
         o_id = self.cnvs.create_line(x0, y0, x1, y1, fill=color, width=self.depicter.y_intervale*self.thickness_coefficient, tags=(self.tag,))
-        self.cnvs.create_text((x0+x1)*0.5, (y0+y1)*0.5, text=f"index: {self.level}", fill="#FF0000")
-        self.cnvs.tag_lower(o_id)
         return o_id
 
     def change_color(self):
@@ -198,7 +221,7 @@ class ClickArea(GridableView):
         x1 = self.x_step+self.depicter.radius
         y1 = self.y_step+self.depicter.radius
         o_id =  self.cnvs.create_rectangle(x0, y0, x1, y1, fill="#FFFFFF", outline="#FFFFFF")
-        self.cnvs.create_text((x0+x1)*0.5, (y0+y1)*0.5, text=f"c{self.column-1}:r{self.depicter.rows-self.row}")
+        #self.cnvs.create_text((x0+x1)*0.5, (y0+y1)*0.5, text=f"c{self.model_column}:r{self.model_row}")
         self.cnvs.tag_lower(o_id)
         return o_id
     
@@ -206,7 +229,7 @@ class ClickArea(GridableView):
         pass
 
     def on_click_left(self, event:Event):
-        self.depicter.left_click_warp(self.column, self.depicter.rows-self.row)
+        self.depicter.left_click_warp(self.model_column, self.model_row)
 
 class BottomClickArea(ClickArea):
     """Визуал описывающий нижнею зону для нажатий"""
@@ -216,7 +239,7 @@ class BottomClickArea(ClickArea):
         x1 = self.x_step+self.depicter.radius
         y1 = self.y_step+self.depicter.y_intervale
         o_id =  self.cnvs.create_rectangle(x0, y0, x1, y1, fill="#FFFFFF", outline="#FFFFFF")
-        self.cnvs.create_text((x0+x1)*0.5, (y0+y1)*0.5, text=f"c{self.column-1}:r{0}")
+        #self.cnvs.create_text((x0+x1)*0.5, (y0+y1)*0.5, text=f"c{self.model_column}:r{0}")
         self.cnvs.tag_lower(o_id)
         return o_id
     
@@ -228,8 +251,8 @@ class TopClickArea(ClickArea):
         x1 = self.x_step + self.depicter.radius
         y1 = self.depicter.y_intervale-self.depicter.radius
         o_id =  self.cnvs.create_rectangle(x0, y0, x1, y1, fill="#FFFFFF", outline="#FFFFFF")
-        self.cnvs.create_text((x0+x1)*0.5, (y0+y1)*0.5, text=f"c{self.column-1}:r{self.depicter.rows}")
+        #self.cnvs.create_text((x0+x1)*0.5, (y0+y1)*0.5, text=f"c{self.model_column}:r{self.depicter.rows}")
         self.cnvs.tag_lower(o_id)
         return o_id
     def on_click_left(self, event:Event):
-        self.depicter.left_click_warp(self.column, self.depicter.rows-self.row+1)
+        self.depicter.left_click_warp(self.model_column, self.model_row+1)

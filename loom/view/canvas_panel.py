@@ -1,11 +1,11 @@
 from math import sqrt
 from tkinter import Tk
 
-from loom.controller import IncreaseWeftsCommand, ReduceWeftsCommand
-from loom.model import FabricProfile, Observer, Side, WeftsGrid
+from loom.controller import IncreaseWeftsCommand, ReduceWeftsCommand, SetWarpAnchorCommand
+from loom.model import FabricProfile, Observer, Side
 from loom.model.warp import Warp
 from loom.view.canvas_bases import CanvasDepicter, RainbowColorsGen
-from loom.view.shapes import BottomClickArea, ClickArea, TopClickArea, WarpView, WeftButton, WeftView
+from loom.view.shapes import BottomClickArea, ClickArea, GridButton, TopClickArea, WarpView, WeftView
 
 
 class CanvasPanel(CanvasDepicter, Observer):
@@ -57,16 +57,18 @@ class CanvasPanel(CanvasDepicter, Observer):
         self.calculate_size_values()
         rainbow = RainbowColorsGen()
 
-        self.draw_buttons()
         self.__create_warp_view(0, 0, rainbow.next_color())# распологаем самую верхнюю линию основы (нулевую)
         for r in range(1, self.rows+1):
             self.y_step = r*self.y_intervale
-            self.__create_warp_view(0, r, rainbow.next_color())
+            warp = self.__create_warp_view(0, r, rainbow.next_color())
+            if  self.active_line and self.rows - r == self.active_line.level:
+                warp._tint()
             for c in range(1, self.columns+1):
                 self.x_step = c*self.x_intervale
                 # распологаем зоны нажатия и утки
                 self.__create_weft_view( c, r)
                 self.__create_click_area(c, r)
+        self.draw_buttons()
         self.can_be_redrawed = True
 
     def draw_buttons(self):
@@ -86,9 +88,8 @@ class CanvasPanel(CanvasDepicter, Observer):
 
     def left_click_warp(self, column, row):
         if self.active_line:
-            column = column-1
-            #row =  self.rows-row
-            self.profile.set_anchor(self.active_line.level, column, row)
+            SetWarpAnchorCommand(self.profile, self.active_line.level, column, row).execute()
+            #self.profile.set_anchor(self.active_line.level, column, row)
             print(self.profile.get_warp(self.active_line.level))
 
     def right_click_warp(self, warp_index):
@@ -101,10 +102,10 @@ class CanvasPanel(CanvasDepicter, Observer):
         print("Weft set2")
 
     def __create_weft_view(self, column, row):
-        WeftView(self, column, row)
+        return WeftView(self, column, row)
 
     def __create_warp_view(self, column, row, color):
-        WarpView(self, column, row, color)
+        return WarpView(self, column, row, color)
 
     def __create_click_area(self, column:int, row:int):
         if row == 1:           # распологаем самый верхний ряд кнопок
@@ -125,4 +126,4 @@ class CanvasPanel(CanvasDepicter, Observer):
             action = IncreaseWeftsCommand(self.profile, cmnd_side)
         else:
             action = ReduceWeftsCommand(self.profile, cmnd_side)
-        WeftButton(self, floor, is_on_left, is_increase, action)
+        GridButton(self, floor, is_on_left, is_increase, action)

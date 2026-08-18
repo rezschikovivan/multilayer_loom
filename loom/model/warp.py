@@ -1,9 +1,11 @@
+from copy import deepcopy
+
 from loom.controller.memo import Memento, Originator
-from loom.model.model_bases import Observer, Side, Textile, TextileContainer, TextileType
+from loom.model.model_bases import Observer, Side, Subject, Textile, TextileContainer, TextileType, notifying
 from loom.model.weft import WeftsGrid
 
 
-class Warp(Textile, Originator):
+class Warp(Textile):
     """
     Основа. Класс компонент для WarpsLines. 
     Хранит относительную позицию основы.
@@ -109,21 +111,15 @@ class Warp(Textile, Originator):
         for _ in range(self.length - target_value):
             self.anchor_points.pop(index)
 
-    def set_memento(self, memento:Memento):
-        self.anchor_points = memento.get_state(self)
-
-    def create_memento(self)->Memento:
-        return Memento(self, self.anchor_points.copy())
-
-
-class WarpLines(TextileContainer, Observer):
+class WarpLines(TextileContainer, Observer, Originator, Subject):
     """
     Составной объект основ. Представляет собой множество основ,
     которые содержат относительные данные о своей форме. Количество
     основы на 1 больше чем высота утков.
     """
     def __init__(self, textile_type:TextileType, grid:WeftsGrid):
-        super(TextileContainer, self).__init__(textile_type) 
+        super(TextileContainer, self).__init__(textile_type)
+        super(Subject, self).__init__()
         self._warps:list[Warp] = []
         grid.register_observer(self)
         for _ in range(grid.column_height+1):
@@ -151,7 +147,7 @@ class WarpLines(TextileContainer, Observer):
 
     def __len__(self):
         return len(self._warps)
-
+    @notifying
     def update_warps(self, grid:WeftsGrid, side:Side):
         """Обновляет все хранимые основы и гарантирует, что обновлены будут все экземпляры"""
         wefts_add_one = grid.column_height+1
@@ -198,3 +194,9 @@ class WarpLines(TextileContainer, Observer):
         warp.set_anchor(line_index, column, target_line)
         warp.update_anchors(line_index, self.lines_count-1)
 
+    @notifying
+    def set_memento(self, memento:Memento):
+        self._warps = memento.get_state(self)
+
+    def create_memento(self):
+        return Memento(self, deepcopy(self._warps))

@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from enum import StrEnum
-from typing import Any, TypeVar, Iterable
+from typing import Any, TypeVar
 
 
 class MultiStrEnum(StrEnum):
