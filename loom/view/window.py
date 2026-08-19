@@ -1,6 +1,7 @@
 from platform import system
 from tkinter import PhotoImage, Tk
-
+import sys
+import os
 from loom.controller.command import CommandManager
 from loom.model import FabricProfile
 from loom.view.canvas_panel import CanvasPanel
@@ -24,7 +25,7 @@ class Window:
         """Adjusts the window size, title, and icon"""
         self.root.title("Многослойный ткацкий станок КГУ")
         self.root.configure(bg="white")
-        icon = PhotoImage(file="icon.png")
+        icon = PhotoImage(file=self._get_resource_path("icon.png"))
         self.root.iconphoto(True, icon)
         self.root.geometry("600x400")  # set usual size
 
@@ -42,6 +43,18 @@ class Window:
         self.root.bind_all("<Control-z>", manager.undo)
         self.root.bind_all("<Control-y>", manager.redo)
 
+    def _get_resource_path(self, filename):
+        """
+        Получает абсолютный путь к файлу ресурса.
+        Работает и при запуске .py, и при запуске собранного .exe.
+        """
+        if hasattr(sys, '_MEIPASS'):
+            # Путь внутри временной папки PyInstaller
+            base_path = sys._MEIPASS
+        else:
+            # Обычный путь при разработке
+            base_path = os.path.abspath(".")
+        return os.path.join(base_path, filename)
     def exit(self):
         """Catch exit button click"""
         self.root.destroy()
@@ -49,3 +62,4 @@ class Window:
     def run(self):
         """Start app"""
         self.root.mainloop()
+
