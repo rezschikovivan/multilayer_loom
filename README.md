@@ -12,3 +12,7 @@
 * В программе работают ctrl-Z (отмена действия) и ctrl-Y (отмена отмены действия).
 * При умеьшении сетки в точке привязки основы, точка привязки сместится (с этим не работает ctrl-Z).
 * Вы можете изменять размеры окна, а картинка подстроится под выбранный формат.
+# UML Диаграммы
+![controller](https://raw.githubusercontent.com/rezschikovivan/multilayer_loom/2efef5c2ba83138a6058921e657e43fc6686d111/Controller.png)
+![model](https://raw.githubusercontent.com/rezschikovivan/multilayer_loom/2efef5c2ba83138a6058921e657e43fc6686d111/Model.png)
+![view](https://raw.githubusercontent.com/rezschikovivan/multilayer_loom/2efef5c2ba83138a6058921e657e43fc6686d111/View.png)
