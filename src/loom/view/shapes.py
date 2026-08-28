@@ -3,12 +3,12 @@ from tkinter import DISABLED, Event
 from tkinter.font import Font
 
 #from math import 
-from loom.controller import Command
-from loom.view.canvas_bases import CanvasDepicter, Redrawable
+from src.loom.controller import Command
+from src.loom.view.canvas_bases import CanvasDepicter, IRedrawable
 
 # Базовые классы визуальных элементов холста
 
-class BaseView(Redrawable):
+class BaseView(IRedrawable):
     def __init__(self, depicter:CanvasDepicter):
         self.depicter = depicter
         self.depicter.add_redrawable(self)

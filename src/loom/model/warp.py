@@ -1,8 +1,8 @@
 from copy import deepcopy
 
-from loom.controller.memo import Memento, Originator
-from loom.model.model_bases import Observer, Side, Subject, Textile, TextileContainer, TextileType, notifying
-from loom.model.weft import WeftsGrid
+from src.loom.controller.memo import IOriginator, Memento
+from src.loom.model.model_bases import IObserver, Side, Subject, Textile, TextileContainer, TextileType, notifying
+from src.loom.model.weft import WeftsGrid
 
 
 class Warp(Textile):
@@ -111,7 +111,7 @@ class Warp(Textile):
         for _ in range(self.length - target_value):
             self.anchor_points.pop(index)
 
-class WarpLines(TextileContainer, Observer, Originator, Subject):
+class WarpLines(TextileContainer, IObserver, IOriginator, Subject):
     """
     Составной объект основ. Представляет собой множество основ,
     которые содержат относительные данные о своей форме. Количество

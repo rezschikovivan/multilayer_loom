@@ -6,3 +6,4 @@ lint.ignore = []
 
 target-version = "py312"
 lint.fixable = ["ALL"]
+

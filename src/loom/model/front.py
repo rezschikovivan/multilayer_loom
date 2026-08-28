@@ -1,9 +1,9 @@
-from loom.model.model_bases import InstanceFactory, Observer, Subject, TextileContainer, TextileType, notifying
-from loom.model.warp import WarpLines
-from loom.model.weft import Side, WeftsGrid
+from src.loom.model.model_bases import InstanceFactory, IObserver, Subject, TextileContainer, TextileType, notifying
+from src.loom.model.warp import WarpLines
+from src.loom.model.weft import Side, WeftsGrid
 
 
-class FabricProfile(TextileContainer, Subject, Observer): 
+class FabricProfile(TextileContainer, Subject, IObserver): 
     def __init__(self, textile_type:TextileType):
         TextileContainer.__init__(self, textile_type)
         Subject.__init__(self)

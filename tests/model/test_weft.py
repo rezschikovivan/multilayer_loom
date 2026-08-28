@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from loom.model.weft import Side, WeftsGrid
+from src.loom.model.weft import Side, WeftsGrid
 
 
 class WeftsGridTest(TestCase):

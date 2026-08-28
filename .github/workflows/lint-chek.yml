@@ -29,7 +29,9 @@ jobs:
           pip install -e .
           pip install ruff
 
-      - name: Run linter with auto-fix
+      - name: Run Ruff with auto-fix
         run: ruff check --fix
 
+      - name: Run lint_interface_naming
+        run: python -m lint_interface_naming .
 

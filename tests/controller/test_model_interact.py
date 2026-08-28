@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from loom.controller import CommandManager, IncreaseWeftsCommand, ReduceWeftsCommand, SetWarpAnchorCommand, ToggleWeftCommand
-from loom.model import FabricProfile
+from src.loom.controller import CommandManager, IncreaseWeftsCommand, ReduceWeftsCommand, SetWarpAnchorCommand, ToggleWeftCommand
+from src.loom.model import FabricProfile
 
 
 class TestSetWarpAnchorCommand(TestCase):

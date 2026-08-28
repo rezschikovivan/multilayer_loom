@@ -1,6 +1,6 @@
 from unittest import TestCase, main
 
-from loom.controller import BottomlessStack, CommandManager, Memento, Originator
+from src.loom.controller import BottomlessStack, CommandManager, IOriginator, Memento
 
 
 class BottomlessStackTest(TestCase):
@@ -18,7 +18,7 @@ class SingletonManagerTest(TestCase):
 
 class MementoTest(TestCase):
     def test_permission(self):
-        class SubOriginator(Originator):
+        class SubOriginator(IOriginator):
             def set_memento(self, memento):
                 self.state = memento.get_state(self)
 
