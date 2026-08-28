@@ -1,6 +1,6 @@
 from unittest import TestCase, main
 
-from loom.controller import BottomlessStack, CommandManager, Memento, Originator
+from src.loom.controller import BottomlessStack, CommandManager, Memento, Originator
 
 
 class BottomlessStackTest(TestCase):

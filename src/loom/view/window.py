@@ -3,10 +3,10 @@ import sys
 from platform import system
 from tkinter import PhotoImage, Tk
 
-from loom.controller.command import CommandManager
-from loom.model import FabricProfile
-from loom.view.canvas_panel import CanvasPanel
-from loom.view.tab_menu import TabMenu
+from src.loom.controller.command import CommandManager
+from src.loom.model import FabricProfile
+from src.loom.view.canvas_panel import CanvasPanel
+from src.loom.view.tab_menu import TabMenu
 
 
 class Window:

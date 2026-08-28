@@ -4,7 +4,7 @@ import argparse
 import ast
 from pathlib import Path
 
-from flake8_interface_naming.checker import InterfaceNamingChecker
+from src.flake8_interface_naming.checker import InterfaceNamingChecker
 
 
 def main(argv: list[str] | None = None) -> int:

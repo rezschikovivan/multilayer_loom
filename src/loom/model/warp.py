@@ -1,8 +1,8 @@
 from copy import deepcopy
 
-from loom.controller.memo import Memento, Originator
-from loom.model.model_bases import Observer, Side, Subject, Textile, TextileContainer, TextileType, notifying
-from loom.model.weft import WeftsGrid
+from src.loom.controller.memo import Memento, Originator
+from src.loom.model.model_bases import Observer, Side, Subject, Textile, TextileContainer, TextileType, notifying
+from src.loom.model.weft import WeftsGrid
 
 
 class Warp(Textile):

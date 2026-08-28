@@ -1,11 +1,11 @@
 from math import sqrt
 from tkinter import Tk
 
-from loom.controller import IncreaseWeftsCommand, ReduceWeftsCommand, SetWarpAnchorCommand
-from loom.model import FabricProfile, Observer, Side
-from loom.model.warp import Warp
-from loom.view.canvas_bases import CanvasDepicter, RainbowColorsGen
-from loom.view.shapes import BottomClickArea, ClickArea, GridButton, TopClickArea, WarpView, WeftView
+from src.loom.controller import IncreaseWeftsCommand, ReduceWeftsCommand, SetWarpAnchorCommand
+from src.loom.model import FabricProfile, Observer, Side
+from src.loom.model.warp import Warp
+from src.loom.view.canvas_bases import CanvasDepicter, RainbowColorsGen
+from src.loom.view.shapes import BottomClickArea, ClickArea, GridButton, TopClickArea, WarpView, WeftView
 
 
 class CanvasPanel(CanvasDepicter, Observer):

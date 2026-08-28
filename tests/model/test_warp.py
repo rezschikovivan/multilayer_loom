@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from loom.model.warp import Side, Warp, WarpLines
-from loom.model.weft import WeftsGrid
+from src.loom.model.warp import Side, Warp, WarpLines
+from src.loom.model.weft import WeftsGrid
 
 
 class TestWarp(TestCase):

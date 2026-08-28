@@ -1,6 +1,6 @@
-from loom.controller import Command
-from loom.model.front import FabricProfile, Side
 from loom_logger import get_logger
+from src.loom.controller import Command
+from src.loom.model.front import FabricProfile, Side
 
 # Команы Сетки утков
 

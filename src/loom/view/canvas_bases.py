@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Generator
 from tkinter import Canvas, Event, Tk
 
-from loom.model.warp import Warp
+from src.loom.model.warp import Warp
 
 
 class Redrawable(ABC):
