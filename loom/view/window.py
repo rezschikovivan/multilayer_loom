@@ -1,7 +1,8 @@
+import os
+import sys
 from platform import system
 from tkinter import PhotoImage, Tk
-import sys
-import os
+
 from loom.controller.command import CommandManager
 from loom.model import FabricProfile
 from loom.view.canvas_panel import CanvasPanel

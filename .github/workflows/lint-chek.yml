@@ -29,7 +29,9 @@ jobs:
           pip install -e .
           pip install ruff
 
-      - name: Run linter with auto-fix
+      - name: Run Ruff with auto-fix
         run: ruff check --fix
 
+      - name: Run flake8_interface_naming
+        run: python -m flake8_interface_naming .
 
