@@ -32,6 +32,6 @@ jobs:
       - name: Run Ruff with auto-fix
         run: ruff check --fix
 
-      - name: Run flake8_interface_naming
-        run: python -m flake8_interface_naming .
+      - name: Run lint_interface_naming
+        run: python -m lint_interface_naming .
 
