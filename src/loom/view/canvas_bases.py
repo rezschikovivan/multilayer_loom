@@ -5,7 +5,7 @@ from tkinter import Canvas, Event, Tk
 from src.loom.model.warp import Warp
 
 
-class Redrawable(ABC):
+class IRedrawable(ABC):
     """Интерфейс объектов которые перерисовщик Redrawer может перерисовать"""
     @abstractmethod
     def redraw(self):
@@ -18,9 +18,9 @@ class Redrawer:
     реализующие интерфейс Redrawable
     """
     def __init__(self):
-        self._to_redraw: list[Redrawable] = []
+        self._to_redraw: list[IRedrawable] = []
 
-    def add_redrawable(self, redrawable: Redrawable):
+    def add_redrawable(self, redrawable: IRedrawable):
         """Добавляет обьект слушатель для перерисовки"""
         self._to_redraw.append(redrawable)
 
@@ -33,7 +33,7 @@ class Redrawer:
         """
         Отчищает список объектов для перерисовки, тем самым предотвращая утечки памяти.
         """
-        self._to_redraw: list[Redrawable] = []
+        self._to_redraw: list[IRedrawable] = []
 
 class ResizableCanvas(Redrawer):
     """Базовый класс для перерисовки канваса при изменении его размеров"""

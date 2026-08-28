@@ -19,19 +19,19 @@ class MultiStrEnum(StrEnum):
     
 Side = MultiStrEnum("Side", ("right","left", "top", "bottom"))
 
-class Observer(ABC):
+class IObserver(ABC):
     @abstractmethod
     def notify(self, subject, *args):
         pass
 
 class Subject:
     def __init__(self):
-        self.observers: list[Observer] = []
+        self.observers: list[IObserver] = []
 
-    def register_observer(self, o: Observer):
+    def register_observer(self, o: IObserver):
         self.observers.append(o)
 
-    def remove_observer(self, o: Observer):
+    def remove_observer(self, o: IObserver):
         self.observers.remove(o)
         
     def notify_observers(self, *args):

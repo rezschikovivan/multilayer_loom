@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from src.flake8_interface_naming.checker import InterfaceNamingChecker
+from src.lint_interface_naming.checker import InterfaceNamingChecker
 
 __all__ = ["InterfaceNamingChecker"]
 

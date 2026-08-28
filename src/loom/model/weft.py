@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from src.loom.controller.memo import Memento, Originator
+from src.loom.controller.memo import IOriginator, Memento
 from src.loom.model.model_bases import InstanceFactory, Side, Textile, TextileContainer, TextileType, WeftGridSubject, notifying
 
 
@@ -23,7 +23,7 @@ class Weft(Textile):
         return self.__str__()
 
 
-class WeftsGrid(TextileContainer, WeftGridSubject, Originator):
+class WeftsGrid(TextileContainer, WeftGridSubject, IOriginator):
     """
     Составной объект описывабщий сетку утков.
     Реализует интерфейс для управления сеткой.

@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
 from tkinter import Event
 
-from src.loom.controller.memo import Memento, Originator
+from src.loom.controller.memo import IOriginator, Memento
 
 
 class Command(ABC):
     """Abstract interface of "command" pattern"""
 
-    def __init__(self, originator:Originator, *memento_args):
+    def __init__(self, originator:IOriginator, *memento_args):
         self.manager = CommandManager()
         self._originator = originator
         self.memento_args = memento_args
