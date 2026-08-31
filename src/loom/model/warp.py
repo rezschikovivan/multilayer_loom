@@ -1,8 +1,205 @@
 from copy import deepcopy
-
+from enum import Enum
+from typing import Iterable
 from src.loom.controller.memo import IOriginator, Memento
 from src.loom.model.model_bases import IObserver, Side, Subject, Textile, TextileContainer, TextileType, notifying
 from src.loom.model.weft import WeftsGrid
+
+#-------- Классы исключений -----------
+class TrajectoryError(Exception):
+    """Ошибка кодирования траектории нити внутри одной колонки"""
+
+class ZerosEntriesError(TrajectoryError):
+    def __str__(self):
+        return "Количество нулей должно быть нечётным!"
+
+class AlternationError(TrajectoryError):
+    def __str__(self):
+        return "Нули должны чередоваться с другими кодами!"
+
+class SequenceLenghtError(TrajectoryError):
+    def __str__(self):
+        return "Длинна последовательности не может быть меньше одного!"
+
+class NotEndsWithNullError(TrajectoryError):
+    def __str__(self):
+        return "Последовательность должна закакниваться на ноль!"
+#--------------------------------------
+
+class Point(tuple):
+    def __new__(cls, column:int, row:int):
+        return super().__new__((column, row))
+
+class TrajectoryMode(Enum):
+    """
+    ## Перечисление с 2-мя состояниями: before, after.
+    ### "before" - нить сразу поднимается/опускается.
+    В таком режиме для построения линии используется нечетное количество высот и чётное количество элементов (с 0-ми).
+    При таком режиме нити траектория будет начинаться с значения высоты.
+    ### "after"  - нить сначала проходит вперед и поднимаеться/опускается уже за утком.
+    В таком режиме для построения линии используется четное количество высот и нечётное количество элементов (с 0-ми).
+    При таком режиме нити траектория будет начинаться с нуля.
+    """
+    before = "before"
+    after = "after"
+
+class ColumnTrajectory(list[int]):
+    """ 
+    ## Класс кодирующий траекторию нити внутри одной колонки.
+    ### Кодирование:
+    Используется 3 категории чисел: 
+    #### 1. Целые положительные > 0
+    Означают насколько поднимается нить вверх.
+    #### 2. Ноль 0
+    Показывает, что нить переходит над/под утком.
+    Позволяет кодировать множественные точки в одной колонке. 
+    #### 3. Целые отрицетльные < 0
+    Означают насколько опускается нить вниз.
+    ### Правила кодирования:
+    1. Количество нулей должно быть нечётным.
+    2. Последовательность должна заканчиваться на ноль.
+    3. Нули должны чередоваться с другими кодами.
+    4. Длинна последовательности не может быть меньше одного
+    """
+    def __init__(self):
+        super().__init__((0,))
+
+    @staticmethod
+    def inspect_trajectory(points: list[int], is_raises=False)->bool|TrajectoryError:
+        """
+        Возвращает True если эта кодировка правильная.
+        Параметр is_raises показывает вернуть false или бросить исключение,
+        если указано false будет возвращено булевое значение.
+        """
+        if len(points) >  0:
+            if (len(points) == 1 and points[0] != 0) or (points[-1] != 0):
+                if is_raises:
+                    raise NotEndsWithNullError()
+                else:
+                    return False
+        else:
+            if is_raises:
+                raise SequenceLenghtError()
+            else:
+                return False
+            
+        null_entries = points.count(0)
+        if null_entries % 2 == 0:
+            if is_raises:
+                raise ZerosEntriesError()
+            else:
+                return False
+        
+        last = points[0]
+        for next in points[1:]:
+            if (last == 0 and next != 0) or (last != 0 and next == 0):
+                last = next
+            else:
+                if is_raises:
+                    raise AlternationError()
+                else:
+                    return False
+                
+        return True
+    @property
+    def heights_iterator(self):
+        def gen():
+            start = 1 if self.mode == TrajectoryMode.after else 0
+            yield from [self[i] for i in range(start, len(self), 2)]
+        return gen()
+    @property
+    def mode(self)->TrajectoryMode:
+        return TrajectoryMode.after if self[0] == 0 else TrajectoryMode.before
+    @property
+    def exit_level(self):
+        return sum(self)
+    @property
+    def enter_level(self):
+        return self[0]
+            
+    def get_across_jumper_index(self, line_index:int, row:int)->int:
+        """Возвращает первый попавшийся индекс при котором высота пересекает переданную строчку."""
+        rel_row = row - line_index
+        height = 0
+        for i, v in enumerate(self):
+            height += v
+            if height == rel_row:
+                return i+1
+            
+    def is_across_level(self, line_index:int,  row:int)->bool:
+        rel_level = row - line_index
+        start = 1 if self.mode == TrajectoryMode.after else 0
+        for i in range(start, len(self), 2):
+            if self[i] == rel_level:
+                return True
+        return False
+
+    def reset_tracery(self, value:Iterable):
+        self.clear()
+        self.extend(value)
+
+    def add_tracery(self, value:Iterable):
+        self.pop()
+        self.extend(value)
+
+    def add_after(self):
+        ...
+
+    def add_before(self):
+        ...
+
+    def set_single_anchor(self, line_index:int, target_row:int):
+        """Устанавливает основе одну точку и всегда в режиме 'before'"""
+        heights = self.__сalculate_heights(line_index, target_row)
+        tracery = self.__arrange_jumpers(TrajectoryMode.before, heights)
+        self.reset_tracery(tracery)
+
+    def try_add_multiple_anchors(self, line_index:int, *target_points:int)->tuple[bool, str]:
+        """Пытаеться добавить новую точку в колонке. Возвращает булевый отчет об успехе операции"""
+        mode = TrajectoryMode.after
+        is_apply, msg = self.validate_points(mode, *target_points)
+        if not is_apply:
+            return False, msg
+        heights = self.__сalculate_heights(line_index, *target_points)
+        tracery = self.__arrange_jumpers(mode, heights)
+        is_valid = self.inspect_trajectory(tracery)
+        if is_valid:
+            self.add_tracery(tracery)
+        return is_valid, str(tracery)
+
+    def validate_points(self, mode:TrajectoryMode, *rows:int)->tuple[bool, str]:
+        """Проверяем входные данные точек. В итоге нить должна выйти вправо"""
+        if len(rows) > 0: 
+                jumpres = (len(rows) + (len(self)//2))
+                if mode == TrajectoryMode.after and jumpres % 2 != 0:
+                    return False, f"При режиме after должно передаваться чётное количество точек! (переданно {len(rows)})"
+                if mode == TrajectoryMode.before and jumpres % 2 == 0:
+                    return False, f"При режиме before должно передаваться нечётное количество точек! (переданно {len(rows)})"
+                return True, "Ошибок нет"
+        else:
+            return False,  SequenceLenghtError.__str__()
+
+    def __сalculate_heights(self, line_index:int, *rows:int)->list[int]:
+        """Рассчитывает высоты. Возвращает список высот, но это не готовый узор, в нём нету 0-ей."""
+        heights = list[int]()
+        for row in rows:
+            anchor = row - line_index
+            if len(heights) > 0:
+                anchor = anchor - heights[-1]
+            heights.append(anchor)
+        return heights
+
+    def __arrange_jumpers(self, mode:TrajectoryMode, heights:list[int])->list[int]:
+        """Расставляет нули в нужных местах."""
+        tracery = []
+        for i, x in enumerate(heights):
+            if i:
+                tracery.append(0)
+            tracery.append(x)
+        if mode == TrajectoryMode.after:
+            tracery.insert(0, 0)
+        tracery.append(0)
+        return tracery
 
 
 class Warp(Textile):

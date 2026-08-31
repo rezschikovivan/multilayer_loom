@@ -1,7 +1,103 @@
 from unittest import TestCase
 
-from src.loom.model.warp import Side, Warp, WarpLines
+from src.loom.model.warp import Side, Warp, WarpLines, ColumnTrajectory, TrajectoryMode
 from src.loom.model.weft import WeftsGrid
+from unittest import TestCase
+
+from src.loom.model.warp import (
+    ColumnTrajectory,
+    TrajectoryError,
+    ZerosEntriesError,
+    AlternationError,
+    SequenceLenghtError,
+    NotEndsWithNullError,
+)
+
+class TestColumnTrajectory(TestCase):
+    def test_set_single_anchor(self):
+        trajectory = ColumnTrajectory()
+        self.assertEqual(trajectory, [0])
+        trajectory.set_single_anchor(0, 2)
+        self.assertEqual(trajectory, [2,0])
+        trajectory.set_single_anchor(3, 2)
+        self.assertEqual(trajectory, [-1,0])
+
+    def test_try_add_multiple_anchors(self):
+        trajectory = ColumnTrajectory()
+        self.assertEqual(trajectory, [0])
+
+        is_apply, msg = trajectory.try_add_multiple_anchors(0, 1, 2)
+        self.assertTrue(is_apply, msg)
+        self.assertEqual(trajectory, [0,1,0,1,0])
+
+        trajectory = ColumnTrajectory()
+        self.assertEqual(trajectory, [0])
+
+        trajectory.set_single_anchor(0, 1)
+        self.assertEqual(trajectory, [1,0])
+
+        is_apply, msg = trajectory.try_add_multiple_anchors(0, 2, 3, 4)
+        self.assertTrue(is_apply, msg)
+        
+    def test_valid_cases(self):
+        """Валидные кодировки"""
+        valid = [
+            [2, 0],
+            [0],
+            [5, 0, -3, 0, 2, 0],
+            [-4, 0, 7, 0, 1, 0],
+            [3, 0, -5, 0, 4, 0, -2, 0, 6, 0],
+            [1, 0, -1, 0, 2, 0],
+            [8, 0],
+            [-9, 0, 4, 0, -3, 0, 2, 0, -1, 0, 5, 0, 7, 0],
+            [10, 0, -2, 0, 3, 0],
+            [6, 0, -8, 0, 1, 0, -4, 0, 9, 0],
+        ]
+        for case in valid:
+            with self.subTest(case=case):
+                self.assertTrue(ColumnTrajectory.inspect_trajectory(case))
+                self.assertTrue(ColumnTrajectory.inspect_trajectory(case, is_raises=True))
+
+    def test_invalid_returns_false(self):
+        """Некорректные: режим возврата False"""
+        invalid = [
+            [0, 0],
+            [2, 0, -3],
+            [2, 0, 0, 3, 0],
+            [],
+            [3, 0, -1, 0, 2],
+            [1, 0, 0, -2, 0, 0],
+            [5, 0, 4, 0, 3, 0, 2, 0, 1, 0, -1],
+            [0, 0, 0],
+            [2, 0, 3, 6, -4, 0, 5, 0, 6, 0],
+            [-3, 0, 0, 2, 0],
+        ]
+        for case in invalid:
+            with self.subTest(case=case):
+                self.assertFalse(ColumnTrajectory.inspect_trajectory(case))
+
+    def test_invalid_raises(self):
+        """Некорректные: режим броска исключения"""
+        # каждый кортеж: (кодировка, ожидаемое исключение)
+        raise_cases = [
+            ([], SequenceLenghtError),                    # пустая последовательность
+            ([0, 0], ZerosEntriesError),                  # чётное число нулей
+            ([2, 0, -3], NotEndsWithNullError),           # не заканчивается нулём
+            ([2, 0, 0, 3, 0], AlternationError),          # нули подряд — нарушено чередование
+            ([1, 0, 0, -2, 0, 0], ZerosEntriesError),     # нарушены и чётность, и чередование
+            ([5, 0, 4, 0, 3, 0, 2, 0, 1, 0, -1], NotEndsWithNullError),  # не заканчивается нулём
+        ]
+        for case, expected in raise_cases:
+            with self.subTest(case=case, expected=expected.__name__):
+                with self.assertRaises(expected):
+                    ColumnTrajectory.inspect_trajectory(case, is_raises=True)
+
+    def test_all_errors_are_trajectory_error(self):
+        """Все ошибки наследуются от TrajectoryError"""
+        for case in [[0, 0], [2, 0, -3], [], [2, 0, 0, 3, 0]]:
+            with self.subTest(case=case):
+                with self.assertRaises(TrajectoryError):
+                    ColumnTrajectory.inspect_trajectory(case, is_raises=True)
 
 
 class TestWarp(TestCase):
